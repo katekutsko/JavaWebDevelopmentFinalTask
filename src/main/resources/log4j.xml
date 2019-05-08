@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration debug="true"
+					 xmlns:log4j='http://jakarta.apache.org/log4j/'>
+
+	<appender name="error" class="org.apache.log4j.RollingFileAppender">
+		<param name="append" value="true"/>
+		<param name="maxFileSize" value="1KB"/>
+		<param name="maxBackupIndex" value="3"/>
+		<param name="threshold" value="ERROR"/>
+		<param name="File" value="D:\\Workspace\\WebProject\\log\\error.log"/>
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern"
+				   value="%d{yyyy-MM-dd HH:mm:ss} %-5p on line %L - %m%n"/>
+		</layout>
+	</appender>
+
+	<appender name="debug" class="org.apache.log4j.RollingFileAppender">
+		<param name="append" value="true"/>
+		<param name="maxFileSize" value="10KB"/>
+		<param name="maxBackupIndex" value="5"/>
+		<param name="threshold" value="DEBUG"/>
+		<param name="File" value="D:\\Workspace\\WebProject\\log\\info.log"/>
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern"
+				   value="%d{yyyy-MM-dd HH:mm:ss} %-5p on line %L - %m%n"/>
+		</layout>
+	</appender>
+
+	<root>
+		<level value="DEBUG"/>
+		<appender-ref ref="debug"/>
+		<appender-ref ref="error"/>
+	</root>
+
+</log4j:configuration>
