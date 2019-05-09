@@ -1,19 +1,18 @@
 package by.epam.javatraining.webproject.command;
 
 import by.epam.javatraining.webproject.controller.ActionType;
-import by.epam.javatraining.webproject.dao.*;
-import by.epam.javatraining.webproject.dao.connection.ConnectionPool;
-import by.epam.javatraining.webproject.entity.Case;
-import by.epam.javatraining.webproject.entity.MedicalCard;
-import by.epam.javatraining.webproject.entity.User;
-import by.epam.javatraining.webproject.exception.CaseDAOException;
-import by.epam.javatraining.webproject.exception.InvalidMedicalCardException;
-import by.epam.javatraining.webproject.exception.UserDAOException;
+import by.epam.javatraining.webproject.model.entity.Case;
+import by.epam.javatraining.webproject.model.entity.MedicalCard;
+import by.epam.javatraining.webproject.model.entity.User;
+import by.epam.javatraining.webproject.model.service.CaseService;
+import by.epam.javatraining.webproject.model.service.MedicalCardService;
+import by.epam.javatraining.webproject.model.service.UserService;
+import by.epam.javatraining.webproject.model.service.factory.ServiceFactory;
+import by.epam.javatraining.webproject.model.service.factory.ServiceType;
 import by.epam.javatraining.webproject.util.Pages;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 public class SelectPatientCommand implements Command {
 
@@ -27,41 +26,36 @@ public class SelectPatientCommand implements Command {
     @Override
     public String execute(HttpServletRequest request, ActionType type) {
 
+        String page = Pages.ERROR_PAGE;
+
         if (type == ActionType.GET) {
             String cardId = request.getParameter("card_id");
             int id = Integer.parseInt(cardId);
 
-            UserDAO userDAO = (UserDAO) DAOFactory.getDAO(DAOType.USER_DAO);
-            MedicalCardDAO cardDAO = (MedicalCardDAO) DAOFactory.getDAO(DAOType.MEDICAL_CARD_DAO);
-            CaseDAO caseDAO = (CaseDAO) DAOFactory.getDAO(DAOType.CASE_DAO);
-
-            ConnectionPool pool = ConnectionPool.getInstance();
-            cardDAO.getConnection(pool);
-
-            MedicalCard card = (MedicalCard) cardDAO.getById(id);
-            cardDAO.releaseConnection(pool);
+            MedicalCardService cardService = (MedicalCardService) ServiceFactory.getService(ServiceType.MEDICAL_CARD_SERVICE);
+            cardService.getConnection();
+            MedicalCard card = (MedicalCard) cardService.getById(id);
+            cardService.releaseConnection();
 
             if (card != null) {
-                try {
-                    userDAO.getConnection(pool);
-                    User user = (User) userDAO.getById(card.getUserID());
-                    userDAO.releaseConnection(pool);
+                UserService userService = (UserService) ServiceFactory.getService(ServiceType.USER_SERVICE);
+                userService.getConnection();
+                User user = (User) userService.getById(card.getUserID());
+                userService.releaseConnection();
 
-                    caseDAO.getConnection(pool);
-                    Case lastCase = caseDAO.getLastCaseByPatientId(id);
-                    caseDAO.releaseConnection(pool);
+                CaseService caseService = (CaseService) ServiceFactory.getService(ServiceType.CASE_SERVICE);
+                caseService.getConnection();
+                Case lastCase = caseService.getLastCaseByPatientId(id);
+                caseService.releaseConnection();
 
-                    request.setAttribute("last_case", lastCase);
-                    request.setAttribute("patient", user);
-                    request.setAttribute("card", card);
+                request.setAttribute("last_case", lastCase);
+                request.setAttribute("patient", user);
+                request.setAttribute("card", card);
 
-                    return Pages.FORWARD_VIEW_PATIENT;
+                page = Pages.FORWARD_VIEW_PATIENT;
 
-                } catch (UserDAOException | CaseDAOException e) {
-                    logger.error(e.getMessage());
-                }
             }
         }
-        return Pages.ERROR_PAGE;
+        return page;
     }
 }

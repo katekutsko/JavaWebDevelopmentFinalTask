@@ -16,7 +16,6 @@ public enum CommandType {
     LOGOUT(new LogOutCommand()),
     VIEW_DOCTORS(new ViewDoctorsCommand()),
     EDIT_CASE(new EditCaseCommand()),
-    ADD_MEDICAL_WORKER(new RegisterMedicalWorkerCommand()),
     VIEW_ALL_USERS(new ViewAllUsersCommand()),
     DELETE_USER(new DeleteUserCommand()),
     VIEW_PRESCRIPTIONS(new ViewPrescriptionsCommand());

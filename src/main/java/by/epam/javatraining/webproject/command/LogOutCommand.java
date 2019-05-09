@@ -13,7 +13,6 @@ public class LogOutCommand implements Command {
 
     {
         logger = Logger.getRootLogger();
-        //DOMConfigurator.configure("D:\\Workspace\\WebProject\\resource\\log4j.xml");
     }
 
     @Override

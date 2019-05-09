@@ -1,14 +1,16 @@
 package by.epam.javatraining.webproject.command;
 
 import by.epam.javatraining.webproject.controller.ActionType;
-import by.epam.javatraining.webproject.dao.*;
-import by.epam.javatraining.webproject.dao.connection.ConnectionPool;
-import by.epam.javatraining.webproject.entity.Case;
-import by.epam.javatraining.webproject.entity.MedicalCard;
-import by.epam.javatraining.webproject.entity.Prescription;
-import by.epam.javatraining.webproject.entity.role.UserRole;
-import by.epam.javatraining.webproject.entity.User;
-import by.epam.javatraining.webproject.exception.*;
+import by.epam.javatraining.webproject.model.entity.Case;
+import by.epam.javatraining.webproject.model.entity.MedicalCard;
+import by.epam.javatraining.webproject.model.entity.Prescription;
+import by.epam.javatraining.webproject.model.entity.role.UserRole;
+import by.epam.javatraining.webproject.model.entity.User;
+import by.epam.javatraining.webproject.model.service.CaseService;
+import by.epam.javatraining.webproject.model.service.PrescriptionService;
+import by.epam.javatraining.webproject.model.service.UserService;
+import by.epam.javatraining.webproject.model.service.factory.ServiceFactory;
+import by.epam.javatraining.webproject.model.service.factory.ServiceType;
 import by.epam.javatraining.webproject.util.Pages;
 import org.apache.log4j.Logger;
 
@@ -31,9 +33,6 @@ public class ViewPatientHistoryCommand implements Command {
         String page = Pages.ERROR_PAGE;
 
         if (type == ActionType.GET) {
-            try {
-                ConnectionPool pool = ConnectionPool.getInstance();
-                CaseDAO caseDAO = (CaseDAO) DAOFactory.getDAO(DAOType.CASE_DAO);
                 String cardIdAsString = request.getParameter("card_id");
                 String name = request.getParameter("name");
                 logger.debug("got " + cardIdAsString + " " + name);
@@ -57,16 +56,19 @@ public class ViewPatientHistoryCommand implements Command {
                 }
 
                 if (name != null && !name.isEmpty() && cardId != 0) {
+                    CaseService caseService = (CaseService) ServiceFactory.getService(ServiceType.CASE_SERVICE);
+                    caseService.getConnection();
+                    List<Case> cases = caseService.getAllCasesOfCertainPatient(cardId);
+                    caseService.releaseConnection();
 
-                    caseDAO.getConnection(pool);
-                    List<Case> cases = caseDAO.getAllCasesOfCertainPatient(cardId);
-                    caseDAO.releaseConnection(pool);
                     request.setAttribute("cases", cases);
                     request.setAttribute("patient_name", name);
 
-                    UserDAO userDAO = (UserDAO) DAOFactory.getDAO(DAOType.USER_DAO);
-                    userDAO.getConnection(pool);
-                    List<User> doctors = userDAO.getAllOfType(UserRole.DOCTOR);
+                    UserService userService = (UserService) ServiceFactory.getService(ServiceType.USER_SERVICE);
+                    userService.getConnection();
+                    List<User> doctors = userService.getAllOfType(UserRole.DOCTOR);
+                    userService.releaseConnection();
+
                     Map<Integer, String> doctorNames = new HashMap<>();
 
                     for (User doctor : doctors) {
@@ -74,30 +76,28 @@ public class ViewPatientHistoryCommand implements Command {
                             doctorNames.put(doctor.getId(), doctor.getSurname() + " " + doctor.getName() + " " + doctor.getPatronymic());
                         }
                     }
-                    userDAO.releaseConnection(pool);
                     request.setAttribute("doctor_names", doctorNames);
 
-                    PrescriptionDAO prescriptionDAO = (PrescriptionDAO) DAOFactory.getDAO(DAOType.PRESCRIPTION_DAO);
-                    prescriptionDAO.getConnection(pool);
+                    PrescriptionService prescriptionService = (PrescriptionService) ServiceFactory.getService(ServiceType.PRESCRIPTION_SERVICE);
+                    prescriptionService.getConnection();
                     Map<Integer, List<Prescription>> prescriptionsByCaseId = new HashMap<>();
 
                     for (Case cur : cases) {
                         int currenctCaseId = cur.getId();
-                        List<Prescription> prescriptions = prescriptionDAO.getAllByCaseId(currenctCaseId);
+                        List<Prescription> prescriptions = prescriptionService.getAllByCaseId(currenctCaseId);
                         prescriptionsByCaseId.put(currenctCaseId, prescriptions);
                     }
 
-                    prescriptionDAO.releaseConnection(pool);
+                    prescriptionService.releaseConnection();
+
                     request.setAttribute("prescriptions_by_case_id", prescriptionsByCaseId);
                     request.removeAttribute("patient");
                     request.removeAttribute("card");
                     request.removeAttribute("last_case");
+
                     logger.info("preparing profile page finished");
                     page = Pages.VIEW_HISTORY;
                 }
-            } catch (CaseDAOException | PrescriptionDAOException | UserDAOException e) {
-                logger.warn(e.getMessage());
-            }
         }
         return page;
     }

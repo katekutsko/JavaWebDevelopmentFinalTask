@@ -1,12 +1,10 @@
 package by.epam.javatraining.webproject.command;
 
 import by.epam.javatraining.webproject.controller.ActionType;
-import by.epam.javatraining.webproject.dao.CaseDAO;
-import by.epam.javatraining.webproject.dao.DAOFactory;
-import by.epam.javatraining.webproject.dao.DAOType;
-import by.epam.javatraining.webproject.dao.connection.ConnectionPool;
-import by.epam.javatraining.webproject.entity.Case;
-import by.epam.javatraining.webproject.exception.CaseDAOException;
+import by.epam.javatraining.webproject.model.entity.Case;
+import by.epam.javatraining.webproject.model.service.CaseService;
+import by.epam.javatraining.webproject.model.service.factory.ServiceFactory;
+import by.epam.javatraining.webproject.model.service.factory.ServiceType;
 import by.epam.javatraining.webproject.util.Messages;
 import by.epam.javatraining.webproject.util.Pages;
 import org.apache.log4j.Logger;
@@ -35,6 +33,7 @@ public class AddCaseCommand implements Command {
             if (cardId != null && !cardId.equals("") && patientName != null && !patientName.equals("")) {
                 int cardID = Integer.parseInt(cardId);
                 String admissionDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+
                 request.setAttribute("patient_name", patientName);
                 request.setAttribute("card_id", cardID);
                 request.setAttribute("admission_date", admissionDate);
@@ -58,21 +57,18 @@ public class AddCaseCommand implements Command {
                 newCase.setMedicalCardId(Integer.parseInt(cardId));
                 logger.info(newCase + " created");
 
-                CaseDAO caseDAO = (CaseDAO) DAOFactory.getDAO(DAOType.CASE_DAO);
-                ConnectionPool pool = ConnectionPool.getInstance();
-                caseDAO.getConnection(pool);
+                CaseService caseService = (CaseService) ServiceFactory.getService(ServiceType.CASE_SERVICE);
+                caseService.getConnection();
 
-                try {
-                    if (caseDAO.insert(newCase)){
-                        request.removeAttribute("patient_name");
-                        request.removeAttribute("card_id");
-                        request.removeAttribute("admission_date");
-                    }
-                } catch (CaseDAOException e) {
-                    logger.error(e.getMessage());
+                if (caseService.add(newCase)) {
+                    request.removeAttribute("patient_name");
+                    request.removeAttribute("card_id");
+                    request.removeAttribute("admission_date");
+                } else {
+                    logger.error("could not add case");
                     request.setAttribute("errorMessage", Messages.ACTION_NOT_PERFORMED);
                 }
-                caseDAO.releaseConnection(pool);
+                caseService.releaseConnection();
                 page = Pages.REDIRECT_VIEW_PATIENT + "&card_id=" + cardId;
             }
             logger.error("case was not recorded");

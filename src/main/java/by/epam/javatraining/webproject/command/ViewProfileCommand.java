@@ -1,13 +1,12 @@
 package by.epam.javatraining.webproject.command;
 
 import by.epam.javatraining.webproject.controller.ActionType;
-import by.epam.javatraining.webproject.dao.DAOFactory;
-import by.epam.javatraining.webproject.dao.DAOType;
-import by.epam.javatraining.webproject.dao.MedicalCardDAO;
-import by.epam.javatraining.webproject.dao.connection.ConnectionPool;
-import by.epam.javatraining.webproject.entity.MedicalCard;
-import by.epam.javatraining.webproject.entity.role.UserRole;
-import by.epam.javatraining.webproject.entity.User;
+import by.epam.javatraining.webproject.model.entity.MedicalCard;
+import by.epam.javatraining.webproject.model.entity.role.UserRole;
+import by.epam.javatraining.webproject.model.entity.User;
+import by.epam.javatraining.webproject.model.service.MedicalCardService;
+import by.epam.javatraining.webproject.model.service.factory.ServiceFactory;
+import by.epam.javatraining.webproject.model.service.factory.ServiceType;
 import by.epam.javatraining.webproject.util.Pages;
 import org.apache.log4j.Logger;
 
@@ -28,12 +27,11 @@ public class ViewProfileCommand implements Command {
             User user = (User) request.getSession().getAttribute("user");
             if (user != null) {
                 if (user.getRole() == UserRole.PATIENT) {
-                    MedicalCardDAO cardDAO = (MedicalCardDAO) DAOFactory.getDAO(DAOType.MEDICAL_CARD_DAO);
-                    ConnectionPool pool = ConnectionPool.getInstance();
-                    cardDAO.getConnection(pool);
-                    MedicalCard card = cardDAO.getByPatientId(user.getId());
+                    MedicalCardService cardService = (MedicalCardService) ServiceFactory.getService(ServiceType.MEDICAL_CARD_SERVICE);
+                    cardService.getConnection();
+                    MedicalCard card = cardService.getByPatientId(user.getId());
                     request.getSession().setAttribute("medical_card", card);
-                    cardDAO.releaseConnection(pool);
+                    cardService.releaseConnection();
                 }
                 page = Pages.FORWARD_VIEW_PROFILE;
             }

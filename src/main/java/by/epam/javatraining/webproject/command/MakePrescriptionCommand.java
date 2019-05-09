@@ -1,13 +1,11 @@
 package by.epam.javatraining.webproject.command;
 
 import by.epam.javatraining.webproject.controller.ActionType;
-import by.epam.javatraining.webproject.dao.DAOFactory;
-import by.epam.javatraining.webproject.dao.DAOType;
-import by.epam.javatraining.webproject.dao.PrescriptionDAO;
-import by.epam.javatraining.webproject.dao.connection.ConnectionPool;
-import by.epam.javatraining.webproject.entity.Prescription;
-import by.epam.javatraining.webproject.entity.PrescriptionType;
-import by.epam.javatraining.webproject.exception.PrescriptionDAOException;
+import by.epam.javatraining.webproject.model.entity.Prescription;
+import by.epam.javatraining.webproject.model.entity.PrescriptionType;
+import by.epam.javatraining.webproject.model.service.PrescriptionService;
+import by.epam.javatraining.webproject.model.service.factory.ServiceFactory;
+import by.epam.javatraining.webproject.model.service.factory.ServiceType;
 import by.epam.javatraining.webproject.util.Pages;
 import org.apache.log4j.Logger;
 
@@ -25,7 +23,7 @@ public class MakePrescriptionCommand implements Command {
     @Override
     public String execute(HttpServletRequest request, ActionType type) {
 
-        String page = null;
+        String page = Pages.ERROR_PAGE;
 
         if (type == ActionType.POST) {
 
@@ -42,36 +40,25 @@ public class MakePrescriptionCommand implements Command {
 
             if (prescriptionType != null && !doctor.equals("0") && !patient.equals("0") && !caseId.equals("0")) {
 
-                ConnectionPool pool = ConnectionPool.getInstance();
-
                 PrescriptionType pType = PrescriptionType.valueOf(prescriptionType);
                 int patientID = Integer.parseInt(patient);
                 int doctorID = Integer.parseInt(doctor);
                 int caseID = Integer.parseInt(caseId);
 
-                Prescription prescription = new Prescription();
-                prescription.setCardId(patientID);
-                prescription.setDoctorId(doctorID);
-                prescription.setDetails(details);
-                prescription.setCaseId(caseID);
-                prescription.setDate(dateAsString);
-                prescription.setType(pType);
+                Prescription prescription = new Prescription(patientID, doctorID, details, dateAsString, pType, caseID);
+                PrescriptionService prescriptionService = (PrescriptionService) ServiceFactory.getService(ServiceType.PRESCRIPTION_SERVICE);
+                prescriptionService.getConnection();
 
-                PrescriptionDAO prescriptionDAO = (PrescriptionDAO) DAOFactory.getDAO(DAOType.PRESCRIPTION_DAO);
-
-                prescriptionDAO.getConnection(pool);
-
-                if(prescriptionDAO.insert(prescription)) {
+                if(prescriptionService.add(prescription)) {
                     page = Pages.REDIRECT_VIEW_PATIENT + "&card_id=" + patientID;
                     logger.info("insertion was successful");
                     request.removeAttribute("patient");
                     request.removeAttribute("card");
                     request.removeAttribute("last_case");
                 } else {
-                    page = Pages.ERROR_PAGE;
                     logger.error("could not insert a prescription");
                 }
-                prescriptionDAO.releaseConnection(pool);
+                prescriptionService.releaseConnection();
             }
         } else {
             long now = new java.util.Date().getTime();

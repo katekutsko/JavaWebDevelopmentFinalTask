@@ -1,16 +1,15 @@
 package by.epam.javatraining.webproject.command;
 
 import by.epam.javatraining.webproject.controller.ActionType;
-import by.epam.javatraining.webproject.dao.CaseDAO;
-import by.epam.javatraining.webproject.dao.DAOFactory;
-import by.epam.javatraining.webproject.dao.DAOType;
-import by.epam.javatraining.webproject.dao.connection.ConnectionPool;
-import by.epam.javatraining.webproject.entity.Case;
-import by.epam.javatraining.webproject.entity.Diagnosis;
-import by.epam.javatraining.webproject.exception.CaseDAOException;
+import by.epam.javatraining.webproject.model.dao.implementation.CaseDAO;
+import by.epam.javatraining.webproject.model.dao.factory.DAOFactory;
+import by.epam.javatraining.webproject.model.dao.factory.DAOType;
+import by.epam.javatraining.webproject.model.dao.connection.ConnectionPool;
+import by.epam.javatraining.webproject.model.entity.Case;
+import by.epam.javatraining.webproject.model.entity.Diagnosis;
+import by.epam.javatraining.webproject.model.exception.CaseDAOException;
 import by.epam.javatraining.webproject.util.Pages;
 import org.apache.log4j.Logger;
-import org.apache.log4j.xml.DOMConfigurator;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;

@@ -1,17 +1,19 @@
 package by.epam.javatraining.webproject.command;
 
 import by.epam.javatraining.webproject.controller.ActionType;
-import by.epam.javatraining.webproject.dao.*;
-import by.epam.javatraining.webproject.dao.connection.ConnectionPool;
-import by.epam.javatraining.webproject.entity.Case;
-import by.epam.javatraining.webproject.entity.MedicalCard;
-import by.epam.javatraining.webproject.entity.Prescription;
-import by.epam.javatraining.webproject.entity.User;
-import by.epam.javatraining.webproject.entity.role.UserRole;
-import by.epam.javatraining.webproject.exception.CaseDAOException;
-import by.epam.javatraining.webproject.exception.CommitException;
-import by.epam.javatraining.webproject.exception.PrescriptionDAOException;
-import by.epam.javatraining.webproject.exception.UserDAOException;
+import by.epam.javatraining.webproject.model.dao.connection.ConnectionPool;
+import by.epam.javatraining.webproject.model.dao.factory.DAOFactory;
+import by.epam.javatraining.webproject.model.dao.factory.DAOType;
+import by.epam.javatraining.webproject.model.dao.implementation.CaseDAO;
+import by.epam.javatraining.webproject.model.dao.implementation.MedicalCardDAO;
+import by.epam.javatraining.webproject.model.dao.implementation.PrescriptionDAO;
+import by.epam.javatraining.webproject.model.dao.implementation.UserDAO;
+import by.epam.javatraining.webproject.model.entity.Case;
+import by.epam.javatraining.webproject.model.entity.MedicalCard;
+import by.epam.javatraining.webproject.model.entity.Prescription;
+import by.epam.javatraining.webproject.model.entity.User;
+import by.epam.javatraining.webproject.model.entity.role.UserRole;
+import by.epam.javatraining.webproject.model.exception.*;
 import by.epam.javatraining.webproject.util.Pages;
 import org.apache.log4j.Logger;
 
@@ -63,7 +65,12 @@ public class DeleteUserCommand implements Command {
                             prescriptionDAO.getConnection(pool);
                             prescriptionDAO.setAutoCommit(false);
 
-                            MedicalCard card = cardDAO.getByPatientId(userId);
+                            MedicalCard card = null;
+                            try {
+                                card = cardDAO.getByPatientId(userId);
+                            } catch (MedicalCardDAOException e) {
+                                e.printStackTrace();
+                            }
 
                             if (card != null) {
 

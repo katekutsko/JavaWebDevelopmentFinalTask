@@ -1,22 +1,19 @@
 package by.epam.javatraining.webproject.command;
 
 import by.epam.javatraining.webproject.controller.ActionType;
-import by.epam.javatraining.webproject.dao.DAOFactory;
-import by.epam.javatraining.webproject.dao.DAOType;
-import by.epam.javatraining.webproject.dao.MedicalCardDAO;
-import by.epam.javatraining.webproject.dao.UserDAO;
-import by.epam.javatraining.webproject.dao.connection.ConnectionPool;
-import by.epam.javatraining.webproject.entity.MedicalCard;
-import by.epam.javatraining.webproject.entity.role.UserRole;
-import by.epam.javatraining.webproject.entity.User;
-import by.epam.javatraining.webproject.exception.CommitException;
-import by.epam.javatraining.webproject.exception.UserDAOException;
-import by.epam.javatraining.webproject.util.Messages;
+import by.epam.javatraining.webproject.model.entity.MedicalCard;
+import by.epam.javatraining.webproject.model.entity.role.UserRole;
+import by.epam.javatraining.webproject.model.entity.User;
+import by.epam.javatraining.webproject.model.service.MedicalCardService;
+import by.epam.javatraining.webproject.model.service.UserService;
+import by.epam.javatraining.webproject.model.service.factory.ServiceFactory;
+import by.epam.javatraining.webproject.model.service.factory.ServiceType;
 import by.epam.javatraining.webproject.util.Pages;
-import by.epam.javatraining.webproject.validation.RegistrationValidation;
+import by.epam.javatraining.webproject.model.validation.RegistrationValidation;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 public class EditProfileCommand implements Command {
     private Logger logger;
@@ -29,11 +26,13 @@ public class EditProfileCommand implements Command {
     public String execute(HttpServletRequest request, ActionType type) {
         String page = null;
 
+        HttpSession session = request.getSession();
         if (type == ActionType.GET) {
             page = Pages.FORWARD_EDIT_PROFILE;
 
         } else {
-            User user = (User) request.getSession().getAttribute("user");
+            User user = (User) session.getAttribute("user");
+
             if (user != null) {
                 String name = request.getParameter("name");
                 String surname = request.getParameter("surname");
@@ -56,9 +55,8 @@ public class EditProfileCommand implements Command {
                     user.setLogin(login);
                 }
                 if (!oldPassword.equals("") && !newPassword.equals("") && !repeatNewPassword.equals("")) {
-                    logger.debug(user.getPassword() + "(" + Long.parseLong(oldPassword) + ") " + " - old encoded password, " + newPassword + " (" + repeatNewPassword + ") - new one");
 
-                    if (Long.parseLong(oldPassword) == user.getPassword()) {
+                    if (oldPassword.hashCode() == user.getPassword()) {
 
                         if (RegistrationValidation.validatePassword(newPassword) && RegistrationValidation.validateRepeatPassword(newPassword,
                                 repeatNewPassword)) {
@@ -66,47 +64,44 @@ public class EditProfileCommand implements Command {
                         }
                     }
                 }
-                UserDAO userDAO = (UserDAO) DAOFactory.getDAO(DAOType.USER_DAO);
-                ConnectionPool pool = ConnectionPool.getInstance();
-                userDAO.getConnection(pool);
+                UserService userService = (UserService) ServiceFactory.getService(ServiceType.USER_SERVICE);
+                userService.getConnection();
 
-                try {
-                    userDAO.setAutoCommit(false);
-                    if (userDAO.update(user)) {
-                        logger.info("user successfully updated: " + user);
+                userService.setAutoCommit(false);
 
-                        if (user.getRole() == UserRole.PATIENT) {
-                            String dateOfBirth = request.getParameter("birth_date");
-                            String sex = request.getParameter("sex");
+                if (userService.update(user)) {
+                    logger.info("user successfully updated: " + user);
 
-                            MedicalCardDAO cardDAO = (MedicalCardDAO) DAOFactory.getDAO(DAOType.MEDICAL_CARD_DAO);
-                            cardDAO.getConnection(pool);
-                            MedicalCard card = cardDAO.getByPatientId(user.getId());
+                    if (user.getRole() == UserRole.PATIENT) {
+                        String dateOfBirth = request.getParameter("birth_date");
+                        String sex = request.getParameter("sex");
 
+                        MedicalCardService cardService = (MedicalCardService) ServiceFactory.getService(ServiceType.MEDICAL_CARD_SERVICE);
+                        MedicalCard card = cardService.getByPatientId(user.getId());
+
+                        if (card != null) {
                             card.setDateOfBirth(dateOfBirth);
                             card.setSex(Byte.parseByte(sex));
 
-                            if (cardDAO.update(card)) {
-                                request.getSession().removeAttribute("user");
-                                request.getSession().removeAttribute("card");
-                                request.getSession().setAttribute("user", user);
-                                request.getSession().setAttribute("card", card);
+                            if (cardService.update(card)) {
+                                session.removeAttribute("user");
+                                session.removeAttribute("card");
+                                session.setAttribute("user", user);
+                                session.setAttribute("card", card);
                                 logger.info("card updated: " + card);
                             } else {
-                                userDAO.rollback();
+                                userService.rollback();
                             }
-                            cardDAO.releaseConnection(pool);
-                        } else {
-                            request.getSession().removeAttribute("user");
-                            request.getSession().setAttribute("user", user);
                         }
-                        userDAO.setAutoCommit(true);
-                        userDAO.releaseConnection(pool);
+                        cardService.releaseConnection();
+                    } else {
+                        session.removeAttribute("user");
+                        session.setAttribute("user", user);
                     }
-                    page = Pages.REDIRECT_VIEW_PROFILE;
-                } catch (UserDAOException | CommitException e) {
-                    request.setAttribute("errorMessage", Messages.getString(Messages.PROFILE_NOT_UPDATED));
+                    userService.setAutoCommit(true);
+                    userService.releaseConnection();
                 }
+                page = Pages.REDIRECT_VIEW_PROFILE;
             }
         }
         return page;
