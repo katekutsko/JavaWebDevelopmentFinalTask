@@ -1,0 +1,5 @@
+package by.epam.javatraining.webproject.model.exception;
+
+public class CommitException extends Exception {
+    //TODO parent class and methods
+}
