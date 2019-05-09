@@ -4,9 +4,7 @@ public class Pages {
     public static final String FORWARD_VIEW_ALL_PATIENTS = "/jsp/view_patients.jsp";
     public static final String REDIRECT_VIEW_ALL_PATIENTS = "Hospital?command=view_all_patients";
 
-    public static final String PATIENT_REGISTRATION = "/jsp/registration.jsp";
-
-    public static final String MEDICAL_WORKER_REGISTRATION = "/jsp/registration.jsp";
+    public static final String REGISTRATION = "/jsp/registration.jsp";
 
     public static final String LOGIN = "/jsp/login.jsp";
     public static final String REDIRECT_LOGIN = "Hospital?command=login";
