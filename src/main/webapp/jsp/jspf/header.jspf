@@ -56,7 +56,7 @@
                     </c:if>
                     <c:if test="${user.role == 'ADMINISTRATOR'}">
                         <li><a href="Hospital?command=view_all_users"><fmt:message key="view_users"/></a></li>
-                        <li><a href="Hospital?command=add_medical_worker"><fmt:message key="add_medical_worker"/></a></li>
+                        <li><a href="Hospital?command=register"><fmt:message key="add_medical_worker"/></a></li>
                     </c:if>
                     <li><a href="Hospital?command=view_profile"><fmt:message key="view_profile"/></a></li>
                     <li><a href="Hospital?command=logout"><fmt:message key="logout"/></a></li>

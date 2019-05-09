@@ -19,7 +19,7 @@
                     <div class="centerbar_top"></div>
                     <div class="centerbar">
                         <div class="centerbar_item">
-                            <table cellpadding="10px" width = "90%" border="1px"  cellspacing="0">
+                            <table cellpadding="10px" width = "85%" border="1px"  cellspacing="0">
                                 <tr>
                                     <td colspan="2" style="text-align : center">
                                         <c:set var="j" value="${i}"/>

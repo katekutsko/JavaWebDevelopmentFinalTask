@@ -20,12 +20,7 @@
 <h3><fmt:message key="registration"/></h3>
 <form method="POST" action="Hospital">
     <div align="center">
-<c:if test="${empty user}">
     <input type="hidden" name="command" value="register"/>
-</c:if>
-<c:if test="${user.role == 'ADMINISTRATOR'}">
-    <input type="hidden" name="command" value="add_medical_worker"/>
-</c:if>
         <fmt:message key="name"/> <p><input type="text" name="name" autocomplete="off"/> </p>
         <fmt:message key="surname"/> <p> <input type="text" name="surname" autocomplete="off"/></p>
         <fmt:message key="patronymic"/><p><input type="text" name="patronymic" autocomplete="off"/></p>

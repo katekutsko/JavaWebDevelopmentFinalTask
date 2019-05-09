@@ -29,7 +29,7 @@
                                     <ul>
                                         <li> <fmt:message key="birth_date"/>: ${ card.dateOfBirth }
                                         <li> <fmt:message key="sex"/>:
-                                            <c:set var="s" value="${ card[j].sex }"/>
+                                            <c:set var="s" value="${ card.sex }"/>
                                             <c:choose>
                                             <c:when test="${ s  == 0}">
                                                 <fmt:message key="female"/>

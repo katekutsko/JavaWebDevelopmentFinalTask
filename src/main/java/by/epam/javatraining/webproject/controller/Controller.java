@@ -54,12 +54,10 @@ public class Controller extends HttpServlet {
                 }
             } else {
                 try {
-                    if (request.getSession().getAttribute("user") == null) {
-                        request.getRequestDispatcher(Pages.LOGIN).forward(request, response);
-                    } else {
-                        logger.info("some error occured, redirecting to error page");
-                        request.getRequestDispatcher(Pages.ERROR_PAGE).forward(request, response);
-                    }
+                    if (request.getSession().getAttribute("user") != null) {
+                       request.getSession().invalidate();
+                    } 
+                    request.getRequestDispatcher(Pages.LOGIN).forward(request, response);
                 } catch (ServletException | IOException e) {
                     logger.error(e.getMessage());
                 }

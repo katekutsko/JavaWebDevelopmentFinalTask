@@ -20,7 +20,9 @@
                 <div class="centerbar_top"></div>
                 <div class="centerbar">
                     <div class="centerbar_item">
-                        <fmt:message key="${message}"/>
+                        <c:if test="${empty prescriptions}">
+                            <fmt:message key="${message}"/>
+                        </c:if>
                         <c:forEach var="pres" items="${prescriptions}">
                             <table border="1px" cellspacing="0" width="350px" align="center"
                                    style="margin-bottom: 10px;">
@@ -35,7 +37,7 @@
                                     </tr>
                                     <tr>
                                         <td><fmt:message key="type"/></td>
-                                        <td> ${pres.type}</td>
+                                        <td><fmt:message key="${pres.type}"/></td>
                                     </tr>
                                     <tr>
                                         <td>
