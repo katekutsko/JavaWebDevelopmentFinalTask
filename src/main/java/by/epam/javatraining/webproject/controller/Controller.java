@@ -5,6 +5,7 @@ import by.epam.javatraining.webproject.command.CommandManager;
 import by.epam.javatraining.webproject.command.CommandType;
 import by.epam.javatraining.webproject.command.RegisterCommand;
 import by.epam.javatraining.webproject.util.Pages;
+import by.epam.javatraining.webproject.util.Parameters;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
@@ -30,9 +31,9 @@ public class Controller extends HttpServlet {
         process(request, response, ActionType.GET);
     }
 
-    public void process(HttpServletRequest request, HttpServletResponse response, ActionType type) {
+    private void process(HttpServletRequest request, HttpServletResponse response, ActionType type) {
 
-        String commandName = request.getParameter("command");
+        String commandName = request.getParameter(Parameters.COMMAND);
 
         if (commandName != null) {
             Command command = CommandManager.getCommand(CommandType.valueOf(commandName.toUpperCase()));
@@ -54,7 +55,7 @@ public class Controller extends HttpServlet {
                 }
             } else {
                 try {
-                    if (request.getSession().getAttribute("user") != null) {
+                    if (request.getSession().getAttribute(Parameters.USER) != null) {
                        request.getSession().invalidate();
                     } 
                     request.getRequestDispatcher(Pages.LOGIN).forward(request, response);
