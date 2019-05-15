@@ -1,15 +1,13 @@
 package by.epam.javatraining.webproject.model.service;
 
 import by.epam.javatraining.webproject.model.dao.AbstractDAO;
-import by.epam.javatraining.webproject.model.dao.connection.ConnectionPool;
-import by.epam.javatraining.webproject.model.entity.Case;
 import by.epam.javatraining.webproject.model.entity.Entity;
-import by.epam.javatraining.webproject.model.entity.User;
 import by.epam.javatraining.webproject.model.exception.CommitException;
 import by.epam.javatraining.webproject.model.exception.DAOException;
+import by.epam.javatraining.webproject.model.service.exception.ServiceException;
 import org.apache.log4j.Logger;
 
-import java.util.List;
+import java.sql.Connection;
 
 public class Service {
 
@@ -19,20 +17,24 @@ public class Service {
         logger = Logger.getRootLogger();
     }
 
-    private static ConnectionPool pool;
     protected AbstractDAO dao;
 
-    static {
-        pool = ConnectionPool.getInstance();
+    public void setConnection(Connection connection){
+        dao.setConnection(connection);
     }
 
-    public void getConnection() {
-        dao.getConnection(pool);
+    public void takeConnection(){
+       dao.takeConnection();
+    }
+
+    public Connection getConnection() {
+        return dao.getConnection();
     }
 
     public void releaseConnection() {
-        dao.releaseConnection(pool);
+        dao.releaseConnection();
     }
+
 
     public boolean setAutoCommit(boolean autoCommit) {
 
@@ -62,49 +64,65 @@ public class Service {
         return result;
     }
 
-    public Entity getById(int caseId) {
+    public Entity getById(int caseId) throws ServiceException {
 
         Entity entity = null;
         try {
             entity = dao.getById(caseId);
         } catch (DAOException e) {
             logger.error(e.getMessage());
+            throw new ServiceException(e.getMessage());
         }
         return entity;
     }
 
-    public boolean edit(Entity entity) {
+    public boolean edit(Entity entity) throws ServiceException {
         boolean result = false;
         try {
             dao.update(entity);
             result= true;
         } catch (DAOException e) {
             logger.error(e.getMessage());
+            throw new ServiceException(e.getMessage());
         }
         return result;
     }
 
-    public boolean add(Entity entity) {
+    public boolean add(Entity entity) throws ServiceException {
         boolean result = false;
         try {
             dao.insert(entity);
             result = true;
         } catch (DAOException e) {
             logger.error(e.getMessage());
+            throw new ServiceException(e.getMessage());
         }
         return result;
     }
 
-    public boolean update(Entity entity) {
+    public boolean update(Entity entity) throws ServiceException {
         boolean result = false;
         try {
             dao.update(entity);
             result = true;
         } catch (DAOException e) {
             logger.error(e.getMessage());
+            throw new ServiceException(e.getMessage());
+
         }
         return result;
     }
 
+    public boolean delete(Entity entity) throws ServiceException {
+        boolean result = false;
+        try {
+            dao.delete(entity);
+            result = true;
+        } catch (DAOException e) {
+            logger.error(e.getMessage());
+            throw new ServiceException(e.getMessage());
+        }
+        return result;
+    }
 }
 

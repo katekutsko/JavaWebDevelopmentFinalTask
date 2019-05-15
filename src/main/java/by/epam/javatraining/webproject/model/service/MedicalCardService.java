@@ -5,38 +5,41 @@ import by.epam.javatraining.webproject.model.dao.factory.DAOFactory;
 import by.epam.javatraining.webproject.model.dao.factory.DAOType;
 import by.epam.javatraining.webproject.model.entity.MedicalCard;
 import by.epam.javatraining.webproject.model.exception.MedicalCardDAOException;
+import by.epam.javatraining.webproject.model.service.exception.MedicalCardServiceException;
+
+import java.util.List;
 
 public class MedicalCardService extends Service {
 
-    MedicalCardDAO cardDAO;
+    private MedicalCardDAO cardDAO;
 
     {
         cardDAO = (MedicalCardDAO) DAOFactory.getDAO(DAOType.MEDICAL_CARD_DAO);
         dao = cardDAO;
     }
 
-    public MedicalCard getByPatientId(int patientId) {
+    public MedicalCard getByPatientId(int patientId) throws MedicalCardServiceException {
 
         try {
             return cardDAO.getByPatientId(patientId);
         } catch (MedicalCardDAOException e) {
             logger.error(e.getMessage());
-            return null;
+            throw new MedicalCardServiceException(e.getMessage());
         }
     }
 
-    public boolean addCard(MedicalCard card) {
+    public boolean addCard(MedicalCard card) throws MedicalCardServiceException {
        boolean result = false;
         try {
-            cardDAO.insert(card);
-            result = true;
+            result =  cardDAO.insert(card);;
         } catch (MedicalCardDAOException e) {
             logger.error(e.getMessage());
+            throw new MedicalCardServiceException(e.getMessage());
         }
         return result;
     }
 
-    public int getIdByUserId(int userId) {
+    public int getIdByUserId(int userId) throws MedicalCardServiceException {
         int id = 0;
         try {
             MedicalCard card = cardDAO.getByPatientId(userId);
@@ -45,7 +48,19 @@ public class MedicalCardService extends Service {
             }
         } catch (MedicalCardDAOException e) {
             logger.error(e.getMessage());
+            throw new MedicalCardServiceException(e.getMessage());
         }
         return id;
+    }
+
+    public List<MedicalCard> getAll() throws MedicalCardServiceException {
+        List<MedicalCard> cards = null;
+        try {
+            cards = cardDAO.getAll();
+        } catch (MedicalCardDAOException e) {
+            logger.error(e.getMessage());
+            throw new MedicalCardServiceException(e.getMessage());
+        }
+        return cards;
     }
 }
