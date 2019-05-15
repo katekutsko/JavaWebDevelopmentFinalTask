@@ -106,12 +106,15 @@ public class UserDAO extends AbstractDAO implements IUserDAO {
 
     public List<User> getAllOfType(UserRole role) throws UserDAOException {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_OF_TYPE);
-            preparedStatement.setString(1, role.name());
-            ResultSet resultSet = preparedStatement.executeQuery();
+            if (role != null) {
+                PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_OF_TYPE);
+                preparedStatement.setString(1, role.name());
+                ResultSet resultSet = preparedStatement.executeQuery();
 
-            return unmarshal(resultSet);
-
+                return unmarshal(resultSet);
+            } else {
+                return null;
+            }
         } catch (SQLException e) {
             throw new UserDAOException("could not get users by type: " + e.getMessage());
         }

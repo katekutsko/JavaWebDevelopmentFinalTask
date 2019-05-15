@@ -9,21 +9,30 @@ import java.sql.SQLException;
 
 public abstract class AbstractDAO implements IDAO {
 
+    private ConnectionPool pool;
     protected Connection connection;
 
     private Logger logger;
 
     {
+        pool = ConnectionPool.getInstance();
         logger = Logger.getRootLogger();
     }
 
-    public void getConnection(ConnectionPool pool) {
+    public void setConnection(Connection connection){
+        this.connection = connection;
+    }
+
+    public void takeConnection(){
         connection = pool.getConnection();
     }
 
-    public void releaseConnection(ConnectionPool pool) {
+    public Connection getConnection() {
+       return connection;
+    }
+
+    public void releaseConnection() {
         pool.releaseConnection(connection);
-        connection = null;
     }
 
     public void setAutoCommit(boolean autocommit) throws CommitException {

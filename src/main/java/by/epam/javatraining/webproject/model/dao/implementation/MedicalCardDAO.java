@@ -99,10 +99,9 @@ public class MedicalCardDAO extends AbstractDAO implements IMedicalCardDAO {
         return null;
     }
 
-    private List<MedicalCard> unmarshal(ResultSet resultSet) {
+    private List<MedicalCard> unmarshal(ResultSet resultSet) throws SQLException {
 
         if (resultSet != null) {
-            try {
                 List<MedicalCard> cardList = new ArrayList<>();
 
                 while (resultSet.next()) {
@@ -116,16 +115,12 @@ public class MedicalCardDAO extends AbstractDAO implements IMedicalCardDAO {
                     cardList.add(card);
                 }
                 return cardList;
-            } catch (SQLException e) {
-                //TODO
-                e.printStackTrace();
-            }
         }
         return null;
     }
 
     @Override
-    public List getAll() {
+    public List getAll() throws MedicalCardDAOException {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -133,9 +128,8 @@ public class MedicalCardDAO extends AbstractDAO implements IMedicalCardDAO {
             return unmarshal(resultSet);
 
         } catch (SQLException e) {
-            e.printStackTrace();//TODO
+            throw new MedicalCardDAOException(e.getMessage());
         }
-        return null;
     }
 
     @Override
@@ -163,7 +157,7 @@ public class MedicalCardDAO extends AbstractDAO implements IMedicalCardDAO {
     }
 
     @Override
-    public boolean delete(Entity entity) {
+    public boolean delete(Entity entity) throws MedicalCardDAOException {
         if (entity != null) {
             MedicalCard card = (MedicalCard) entity;
 
@@ -173,7 +167,7 @@ public class MedicalCardDAO extends AbstractDAO implements IMedicalCardDAO {
                 preparedStatement.executeUpdate();
 
             } catch (SQLException e) {
-                e.printStackTrace();//TODO
+                throw new MedicalCardDAOException("could not insert medical card");
             }
             return true;
         }

@@ -6,6 +6,8 @@ import by.epam.javatraining.webproject.model.entity.Case;
 import by.epam.javatraining.webproject.model.entity.Diagnosis;
 import by.epam.javatraining.webproject.model.entity.Entity;
 import by.epam.javatraining.webproject.model.exception.CaseDAOException;
+import by.epam.javatraining.webproject.util.Fields;
+import by.epam.javatraining.webproject.util.Parameters;
 import by.epam.javatraining.webproject.util.configuration.ConfigurationData;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
@@ -67,20 +69,20 @@ public class CaseDAO extends AbstractDAO implements ICaseDAO {
 
             while (resultSet.next()) {
                 Case foundCase = new Case();
-                foundCase.setId(resultSet.getInt("idcase"));
-                foundCase.setAdmissionDate(resultSet.getString("admission_date"));
-                foundCase.setDischargeDate(resultSet.getString("discharge_date"));
-                foundCase.setActive(resultSet.getInt("active"));
-                foundCase.setDoctorId(resultSet.getInt("iddoctor"));
-                int diagnosisId = resultSet.getInt("final_diagnosis");
+                foundCase.setId(resultSet.getInt(Fields.IDCASE));
+                foundCase.setAdmissionDate(resultSet.getString(Fields.ADMISSION_DATE));
+                foundCase.setDischargeDate(resultSet.getString(Fields.DISCHARGE_DATE));
+                foundCase.setActive(resultSet.getInt(Fields.ACTIVE));
+                foundCase.setDoctorId(resultSet.getInt(Fields.IDDOCTOR));
+                int diagnosisId = resultSet.getInt(Fields.FINAL_DIAGNOSIS);
 
                 if (diagnosisId != 0) {
                     foundCase.setFinalDiagnosis(Diagnosis.values()[diagnosisId - 1]);
                 } else {
                     foundCase.setFinalDiagnosis(null);
                 }
-                foundCase.setComplaints(resultSet.getString("complaints"));
-                foundCase.setMedicalCardId(resultSet.getInt("idmedical_card"));
+                foundCase.setComplaints(resultSet.getString(Fields.COMPLAINTS));
+                foundCase.setMedicalCardId(resultSet.getInt(Fields.IDMEDICAL_CARD));
                 logger.debug("found case: " + foundCase);
                 caseList.add(foundCase);
             }
