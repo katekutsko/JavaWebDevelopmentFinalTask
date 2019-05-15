@@ -18,7 +18,8 @@ public enum CommandType {
     EDIT_CASE(new EditCaseCommand()),
     VIEW_ALL_USERS(new ViewAllUsersCommand()),
     DELETE_USER(new DeleteUserCommand()),
-    VIEW_PRESCRIPTIONS(new ViewPrescriptionsCommand());
+    VIEW_PRESCRIPTIONS(new ViewPrescriptionsCommand()),
+    SEARCH(new SearchCommand());
 
     private Command command;
 
