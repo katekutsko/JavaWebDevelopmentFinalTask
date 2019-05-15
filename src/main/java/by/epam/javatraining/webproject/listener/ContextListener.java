@@ -56,7 +56,6 @@ public class ContextListener implements ServletContextListener {
     /**
      * Initializes log4j framework.
      *
-
      * @param servletContext
      *            with <code>log4j.properties</code> file path, from which
      *            <code>log4j</code> will be configured
@@ -72,24 +71,4 @@ public class ContextListener implements ServletContextListener {
         LOG.debug("Log4j has been initialized");
 
     }
-
-   /* private void initCommandManager() {
-
-       // initialize commands manager
-
-        // just load class to JVM
-
-        try {
-
-            Class.forName("ua.nure.norkin.SummaryTask4.command.CommandManager");
-
-        } catch (ClassNotFoundException ex) {
-
-            throw new IllegalStateException(
-
-                    "Cannot initialize Command Manager", ex);
-
-        }
-
-    }*/
 }
