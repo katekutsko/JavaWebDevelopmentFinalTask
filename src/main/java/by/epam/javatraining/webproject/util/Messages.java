@@ -12,7 +12,10 @@ public class Messages {
     public static final String LOCALISATION_PROPERTIES = "localisation";
     public static final String PROFILE_NOT_UPDATED = "profile_not_updated";
     public static final String NO_RESULTS = "no_results";
-    public static final String CONNECTION_ERROR = "something_went_wrong";
+    public static final String INTERNAL_ERROR = "something_went_wrong";
+    public static final String INVALID_DATA = "invalid_data";
+    public static final String INCORRECT_PASSWORD = "incorrect_password";
+    public static final String LOGIN_EXISTS = "login_exists";
 
     private static ResourceBundle resourceBundle;
     private static Locale locale;

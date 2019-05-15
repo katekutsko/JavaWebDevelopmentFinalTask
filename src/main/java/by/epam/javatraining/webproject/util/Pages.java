@@ -14,7 +14,8 @@ public class Pages {
 
     public static final String FORWARD_EDIT_PROFILE = "/jsp/edit_profile.jsp";
 
-    public static final String ERROR_PAGE = "/jsp/view_prle.jsp";
+    public static final String ERROR_PAGE = "/jsp/error.jsp";
+    public static final String REDIRECT_ERROR_PAGE = "Hospital?command=no_command";
 
     public static final String FORWARD_VIEW_PATIENT = "/jsp/view_patient.jsp";
     public static final String REDIRECT_VIEW_PATIENT = "Hospital?command=select_patient";
