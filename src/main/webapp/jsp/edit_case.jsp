@@ -45,19 +45,8 @@
                             <label for="4"><fmt:message key="complaints"/>
                                 <input id="4" type="text" name="complaints" value="${complaints}" style="width: 350px" maxlength="100"/>
                             </label></br>
-                            <label for="7"><fmt:message key="diagnosis"/>
-                                <select id="7" name="final_diagnosis" style="margin-top: -30px;">
-                                    <c:forEach items="${diagnoses}" var="opt">
-                                       <c:choose>
-                                        <c:when test="${ opt == diagnosis}">
-                                        <option  selected="selected" value="${opt}">${opt}</option>
-                                        </c:when>
-                                           <c:otherwise>
-                                               <option value="${opt}">${opt}</option>
-                                           </c:otherwise>
-                                       </c:choose>
-                                    </c:forEach>
-                                </select>
+                            <label><fmt:message key="diagnosis"/>
+                                <ctg:diagnoses/>
                             </label>
 
                             <input type="submit" value="Submit" style="margin-left: 100px"/>

@@ -66,13 +66,13 @@
                                                     <c:choose>
                                                         <c:when test="${user.role == 'DOCTOR' && (empty last_case || last_case.active == 0)}">
                                                             <button type="submit" name="command" value="add_record"
-                                                                    style="width: 120px"><fmt:message key="add_case"/>
+                                                                    style="width: 120px; height: 40px;"><fmt:message key="add_case"/>
                                                             </button>
                                                         </c:when>
                                                         <c:otherwise>
                                                             <button disabled="disabled" type="submit" name="command"
                                                                     value="add_record"
-                                                                    style="width: 120px"><fmt:message key="add_case"/>
+                                                                    style="width: 120px; height: 40px;"><fmt:message key="add_case"/>
                                                             </button>
                                                         </c:otherwise>
                                                     </c:choose>
@@ -82,13 +82,13 @@
                                                     <c:choose>
                                                         <c:when test="${last_case.active == 1 && last_case.doctorId == user.id}">
                                                             <button type="submit" name="command" value="discharge"
-                                                                    style="width: 120px"><fmt:message key="discharge"/>
+                                                                    style="width: 120px; height: 40px;"><fmt:message key="discharge"/>
                                                             </button>
                                                         </c:when>
                                                         <c:otherwise>
                                                             <button disabled="disabled" type="submit" name="command"
                                                                     value="discharge"
-                                                                    style="width: 120px"><fmt:message key="discharge"/>
+                                                                    style="width: 120px; height: 40px;"><fmt:message key="discharge"/>
                                                             </button>
                                                         </c:otherwise>
                                                     </c:choose>

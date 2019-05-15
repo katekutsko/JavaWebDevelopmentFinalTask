@@ -44,6 +44,7 @@
                 <c:when test="${empty user}">
                     <li><a href="Hospital?command=view_doctors"><fmt:message key="view_doctors"/></a></li>
                     <li><a href="Hospital?command=register"><fmt:message key="register"/></a></li>
+                    <li><a href="Hospital?command=login"><fmt:message key="log_in"/></a></li>
                 </c:when>
                 <c:otherwise>
                     <c:if test="${user.role == 'PATIENT'}">

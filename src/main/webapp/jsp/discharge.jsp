@@ -48,14 +48,7 @@
                                 </tr>
                                 <tr>
                                     <td><fmt:message key="diagnosis"/></td>
-                                    <td><select name="final_diagnosis" value="none" required="yes">
-
-                                        <c:forEach items="${diagnoses}" var="diagnosis">
-
-                                            <option value="${diagnosis}">${diagnosis}</option>
-
-                                        </c:forEach>
-                                    </select></td>
+                                    <td><ctg:diagnoses/></td>
                                 </tr>
 
                                 <input type="hidden" name="doctor_id" value="${user.id}" readonly="readonly"/></br>

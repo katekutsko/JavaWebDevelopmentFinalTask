@@ -20,9 +20,9 @@
                 <div align="center">
                     <fmt:message key="login"/> </br>
                     <input type="text" name="login" value="${param.login}"/></br>
-                    <p style="color: #F00"> ${loginError} </p>
-                    <fmt:message key="password"/> </br> <input type="password" name="password"/>
-                    <p style="color: #F00"> ${passwordError} </p>
+                   <c:if test="${not empty loginError}"><p style="color: #F00"> <fmt:message key="${loginError}"/></p></c:if>
+                    <fmt:message key="password"/> </br> <input type="password" name="password"/></br>
+                    <c:if test="${not empty passwordError}"><p style="color: #F00"> <fmt:message key="${passwordError}"/></p></c:if>
 
                     <button type="submit"/>  <fmt:message key="log_in"/> </button> </br> </br>
 

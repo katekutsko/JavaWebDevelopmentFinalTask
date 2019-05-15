@@ -13,6 +13,11 @@
 
         <%@include file='jspf/side_content.jspf' %>
 
+        <c:set var="amount" value="${fn:length(users)}"/>
+        <c:set var="size" value="4"/>
+        <c:set var="from" value="${param.from}"/>
+        <c:set var="to" value="${from + size - 1}"/>
+
         <div id="content">
             <div id="centerbar_container">
                 <div class="centerbar_top"></div>
@@ -29,7 +34,10 @@
                                     <td width="20%"><fmt:message key="role"/></td>
                                     <td width="15%"></td>
                                 </tr>
-                                <c:forEach items="${users}" var="current_user">
+                                <c:if test="${empty users}">
+                                    <p><fmt:message key="${error}"/> </p>
+                                </c:if>
+                                <c:forEach items="${users}" var="current_user" begin="${from}" end="${to}">
                                     <tr>
                                         <td>${current_user.id} </td>
                                         <td>${current_user.surname} ${current_user.name} ${current_user.patronymic} </td>
@@ -46,6 +54,20 @@
                                 </c:forEach>
                             </table>
                         </form>
+                        <c:if test="${(from + size) < amount}">
+                            <a style="float: right; margin-top: 20px; margin-right: 70px;" href="<c:url value="${requestScope['javax.servlet.forward.servlet_path']}">
+                    <c:param name='from' value="${from + size}"/>
+
+                       <c:param name="command" value="${param.command}"/> </c:url>">
+                                <fmt:message key="next"/> </a>
+                        </c:if>
+                        <c:if test="${(from - size) ge 0}">
+                            <a style="float: left; margin-top: 20px;" href="<c:url value="${requestScope['javax.servlet.forward.servlet_path']}">
+                    <c:param name='from' value="${from - size}"/>
+
+                       <c:param name="command" value="${param.command}"/> </c:url>">
+                                <fmt:message key="previous"/> </a>
+                        </c:if>
                     </div>
                 </div>
                 <div class="centerbar_base"></div>
