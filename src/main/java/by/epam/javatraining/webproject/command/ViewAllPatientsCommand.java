@@ -1,19 +1,21 @@
 package by.epam.javatraining.webproject.command;
 
 import by.epam.javatraining.webproject.controller.ActionType;
-import by.epam.javatraining.webproject.model.dao.connection.ConnectionPool;
-import by.epam.javatraining.webproject.model.dao.factory.DAOFactory;
-import by.epam.javatraining.webproject.model.dao.factory.DAOType;
-import by.epam.javatraining.webproject.model.dao.implementation.CaseDAO;
-import by.epam.javatraining.webproject.model.dao.implementation.MedicalCardDAO;
-import by.epam.javatraining.webproject.model.dao.implementation.UserDAO;
 import by.epam.javatraining.webproject.model.entity.Case;
 import by.epam.javatraining.webproject.model.entity.MedicalCard;
 import by.epam.javatraining.webproject.model.entity.role.UserRole;
 import by.epam.javatraining.webproject.model.entity.User;
-import by.epam.javatraining.webproject.model.exception.CaseDAOException;
-import by.epam.javatraining.webproject.model.exception.UserDAOException;
+import by.epam.javatraining.webproject.model.service.CaseService;
+import by.epam.javatraining.webproject.model.service.MedicalCardService;
+import by.epam.javatraining.webproject.model.service.UserService;
+import by.epam.javatraining.webproject.model.service.exception.CaseServiceException;
+import by.epam.javatraining.webproject.model.service.exception.MedicalCardServiceException;
+import by.epam.javatraining.webproject.model.service.exception.UserServiceException;
+import by.epam.javatraining.webproject.model.service.factory.ServiceFactory;
+import by.epam.javatraining.webproject.model.service.factory.ServiceType;
+import by.epam.javatraining.webproject.util.Messages;
 import by.epam.javatraining.webproject.util.Pages;
+import by.epam.javatraining.webproject.util.Parameters;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -30,53 +32,51 @@ public class ViewAllPatientsCommand implements Command {
     @Override
     public String execute(HttpServletRequest request, ActionType type) {
 
-        UserDAO userDAO = (UserDAO) DAOFactory.getDAO(DAOType.USER_DAO);
-        MedicalCardDAO cardDAO = (MedicalCardDAO) DAOFactory.getDAO(DAOType.MEDICAL_CARD_DAO);
-        CaseDAO caseDAO = (CaseDAO) DAOFactory.getDAO(DAOType.CASE_DAO);
+        String page = Pages.ERROR_PAGE;
 
-        ConnectionPool pool = ConnectionPool.getInstance();
+        UserService userService = (UserService) ServiceFactory.getService(ServiceType.USER_SERVICE);
+        userService.takeConnection();
 
-            try {
-                userDAO.getConnection(pool);
-                cardDAO.getConnection(pool);
+        MedicalCardService cardService = (MedicalCardService) ServiceFactory.getService(ServiceType.MEDICAL_CARD_SERVICE);
+        cardService.setConnection(userService.getConnection());
 
-                List<User> userList = userDAO.getAllOfType(UserRole.PATIENT);
-                List<MedicalCard> cardList = cardDAO.getAll();
-                List<Case> lastCasesList = new ArrayList<>();
+        CaseService caseService = (CaseService) ServiceFactory.getService(ServiceType.CASE_SERVICE);
+        try {
+            List<User> userList = userService.getAllOfType(UserRole.PATIENT);
 
-                if (userList != null && cardList != null) {
-                    caseDAO.getConnection(pool);
+            List<MedicalCard> cardList = cardService.getAll();
 
-                    for (MedicalCard card : cardList) {
+            List<Case> lastCasesList = new ArrayList<>();
 
-                        try {
-                            lastCasesList.add(caseDAO.getLastCaseByPatientId(card.getId()));
-                            logger.debug("something was added to lastcase list");
-                            request.setAttribute("patients", userList);
-                            request.setAttribute("cards", cardList);
-                            request.setAttribute("cases", lastCasesList);
-                            request.setAttribute("amount", userList.size());
+            if (userList != null && cardList != null) {
+                caseService.setConnection(userService.getConnection());
 
-                            logger.info("patients were found and set as attributes");
-                            logger.info("amount of patients: " + userList.size());
-                        } catch (CaseDAOException e) {
-                            logger.warn("bad medical card ID " + card.getId());
-                        }
+                for (MedicalCard card : cardList) {
+                    try {
+                        lastCasesList.add(caseService.getLastCaseByPatientId(card.getId()));
+                    } catch (CaseServiceException e) {
+                        logger.error(e.getMessage());
                     }
-                } else {
-                    logger.warn("patients were not found");
+
+                    logger.info("patients were found and set as attributes");
+                    logger.info("amount of patients: " + userList.size());
                 }
+                request.setAttribute(Parameters.PATIENTS, userList);
+                request.setAttribute(Parameters.CARDS, cardList);
+                request.setAttribute(Parameters.CASES, lastCasesList);
+                request.setAttribute(Parameters.AMOUNT, userList.size());
 
-                return Pages.FORWARD_VIEW_ALL_PATIENTS;
-
-            } catch (UserDAOException e) {
-                logger.warn("couldn't extract users from database. cause: " + e.getMessage());
-            } finally {
-                userDAO.releaseConnection(pool);
-                cardDAO.releaseConnection(pool);
-                caseDAO.releaseConnection(pool);
+                page = Pages.FORWARD_VIEW_ALL_PATIENTS;
+            } else {
+                logger.warn("patients were not found");
             }
-        return Pages.ERROR_PAGE;
+        } catch (MedicalCardServiceException | UserServiceException e) {
+            logger.error(e.getMessage());
+            request.getSession().setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
+        } finally {
+            userService.releaseConnection();
+        }
+        return page;
     }
 
 }

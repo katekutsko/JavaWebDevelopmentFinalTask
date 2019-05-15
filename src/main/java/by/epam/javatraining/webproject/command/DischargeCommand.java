@@ -1,14 +1,14 @@
 package by.epam.javatraining.webproject.command;
 
 import by.epam.javatraining.webproject.controller.ActionType;
-import by.epam.javatraining.webproject.model.dao.implementation.CaseDAO;
-import by.epam.javatraining.webproject.model.dao.factory.DAOFactory;
-import by.epam.javatraining.webproject.model.dao.factory.DAOType;
-import by.epam.javatraining.webproject.model.dao.connection.ConnectionPool;
 import by.epam.javatraining.webproject.model.entity.Case;
 import by.epam.javatraining.webproject.model.entity.Diagnosis;
-import by.epam.javatraining.webproject.model.exception.CaseDAOException;
+import by.epam.javatraining.webproject.model.service.CaseService;
+import by.epam.javatraining.webproject.model.service.exception.ServiceException;
+import by.epam.javatraining.webproject.model.service.factory.ServiceFactory;
+import by.epam.javatraining.webproject.model.service.factory.ServiceType;
 import by.epam.javatraining.webproject.util.Pages;
+import by.epam.javatraining.webproject.util.Parameters;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,56 +20,56 @@ public class DischargeCommand implements Command {
 
     {
         logger = Logger.getRootLogger();
-        //DOMConfigurator.configure("D:\\Workspace\\WebProject\\resource\\log4j.xml");
     }
 
     @Override
     public String execute(HttpServletRequest request, ActionType type) {
 
         String page = null;
-        if (type == ActionType.POST){
+        if (type == ActionType.POST) {
 
-            String card = request.getParameter("card_id");
-            String doctor = request.getParameter("doctor_id");
-            String diagnosisString = request.getParameter("final_diagnosis");
-            String date = request.getParameter("discharge_date");
-            String lastCaseId = request.getParameter("last_case");
+            String card = request.getParameter(Parameters.CARD_ID);
+            String doctor = request.getParameter(Parameters.DOCTOR_ID);
+            String diagnosisString = request.getParameter(Parameters.FINAL_DIAGNOSIS);
+            String date = request.getParameter(Parameters.DISCHARGE_DATE);
+            String lastCaseId = request.getParameter(Parameters.LAST_CASE);
 
             logger.info("dischargement data: " + card + doctor + diagnosisString + date + lastCaseId);
 
             if (diagnosisString != null && date != null && lastCaseId != null && !lastCaseId.equals("")) {
-                ConnectionPool pool = ConnectionPool.getInstance();
 
                 Diagnosis diagnosis = Diagnosis.valueOf(diagnosisString);
-                CaseDAO caseDAO = (CaseDAO) DAOFactory.getDAO(DAOType.CASE_DAO);
-                caseDAO.getConnection(pool);
+                CaseService caseService = (CaseService) ServiceFactory.getService(ServiceType.CASE_SERVICE);
+
+                caseService.takeConnection();
 
                 try {
-                    Case lastCase = (Case) caseDAO.getById(Integer.parseInt(lastCaseId));
+                    Case lastCase = (Case) caseService.getById(Integer.parseInt(lastCaseId));
                     lastCase.setFinalDiagnosis(diagnosis);
                     lastCase.setDischargeDate(date);
                     logger.debug("updated case in code");
 
-                    if (caseDAO.closeCase(lastCase)){
+                    if (caseService.closeCase(lastCase)) {
                         logger.info("successful dischargement");
-                        request.removeAttribute("patient");
-                        request.removeAttribute("card");
-                        request.removeAttribute("last_case");
-                        request.removeAttribute("discharge_date");
+                        request.removeAttribute(Parameters.PATIENT);
+                        request.removeAttribute(Parameters.CARD);
+                        request.removeAttribute(Parameters.LAST_CASE);
+                        request.removeAttribute(Parameters.DISCHARGE_DATE);
+                        page = Pages.REDIRECT_VIEW_ALL_PATIENTS;
                     } else {
                         logger.info("not discharged");
                     }
-                } catch (CaseDAOException e) {
+                } catch (ServiceException e){
                     logger.error(e.getMessage());
                 }
-                caseDAO.releaseConnection(pool);
+                caseService.releaseConnection();
             }
-            page = Pages.REDIRECT_VIEW_ALL_PATIENTS;
         } else {
-            request.setAttribute("diagnoses", Diagnosis.values());
-            request.setAttribute("discharge_date", new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString());
+            request.setAttribute(Parameters.DIAGNOSES, Diagnosis.values());
+            request.setAttribute(Parameters.DISCHARGE_DATE, new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString());
             page = Pages.FORWARD_DISCHARGE;
         }
         return page;
     }
 }
+

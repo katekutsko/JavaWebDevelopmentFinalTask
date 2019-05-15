@@ -9,9 +9,14 @@ import by.epam.javatraining.webproject.model.entity.User;
 import by.epam.javatraining.webproject.model.service.CaseService;
 import by.epam.javatraining.webproject.model.service.PrescriptionService;
 import by.epam.javatraining.webproject.model.service.UserService;
+import by.epam.javatraining.webproject.model.service.exception.CaseServiceException;
+import by.epam.javatraining.webproject.model.service.exception.PrescriptionServiceException;
+import by.epam.javatraining.webproject.model.service.exception.UserServiceException;
 import by.epam.javatraining.webproject.model.service.factory.ServiceFactory;
 import by.epam.javatraining.webproject.model.service.factory.ServiceType;
+import by.epam.javatraining.webproject.util.Messages;
 import by.epam.javatraining.webproject.util.Pages;
+import by.epam.javatraining.webproject.util.Parameters;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,71 +38,79 @@ public class ViewPatientHistoryCommand implements Command {
         String page = Pages.ERROR_PAGE;
 
         if (type == ActionType.GET) {
-                String cardIdAsString = request.getParameter("card_id");
-                String name = request.getParameter("name");
-                logger.debug("got " + cardIdAsString + " " + name);
+            String cardIdAsString = request.getParameter(Parameters.CARD_ID);
+            String name = request.getParameter(Parameters.NAME);
+            logger.debug("got " + cardIdAsString + " " + name);
+            int cardId = 0;
 
-                int cardId = 0;
+            if ((cardIdAsString == null || cardIdAsString.isEmpty()) && (name == null || name.isEmpty())) {
+                User patient = (User) request.getSession().getAttribute(Parameters.USER);
+                MedicalCard card = (MedicalCard) request.getSession().getAttribute(Parameters.MEDICAL_CARD);
 
-                if (cardIdAsString == null || name == null) {
-
-                        User patient = (User) request.getSession().getAttribute("user");
-                        MedicalCard card = (MedicalCard) request.getSession().getAttribute("medical_card");
-
-                        logger.info("entered as a patient, so session attributes were extracted: " + patient + " " + card);
-
-                        if (card != null && patient != null) {
-                            name = patient.getSurname() + " " + patient.getName() + " " + patient.getPatronymic();
-                            cardId = card.getId();
-                        }
-
-                } else {
-                    cardId = Integer.parseInt(cardIdAsString);
+                if (card != null && patient != null) {
+                    name = patient.getSurname() + " " + patient.getName() + " " + patient.getPatronymic();
+                    cardId = card.getId();
                 }
+            } else if (cardIdAsString != null) {
+                    cardId = Integer.parseInt(cardIdAsString);
+            }
 
-                if (name != null && !name.isEmpty() && cardId != 0) {
-                    CaseService caseService = (CaseService) ServiceFactory.getService(ServiceType.CASE_SERVICE);
-                    caseService.getConnection();
-                    List<Case> cases = caseService.getAllCasesOfCertainPatient(cardId);
-                    caseService.releaseConnection();
+            if (name != null && !name.isEmpty() && cardId != 0) {
+                CaseService caseService = (CaseService) ServiceFactory.getService(ServiceType.CASE_SERVICE);
+                caseService.takeConnection();
+                List<Case> cases = null;
 
-                    request.setAttribute("cases", cases);
-                    request.setAttribute("patient_name", name);
+                try {
+                    cases = caseService.getAllCasesOfCertainPatient(cardId);
+                } catch (CaseServiceException e) {
+                    logger.error(e.getMessage());
+                }
+                request.setAttribute(Parameters.CASES, cases);
+                request.setAttribute(Parameters.PATIENT_NAME, name);
 
+                if (cases != null && !cases.isEmpty()) {
                     UserService userService = (UserService) ServiceFactory.getService(ServiceType.USER_SERVICE);
-                    userService.getConnection();
-                    List<User> doctors = userService.getAllOfType(UserRole.DOCTOR);
-                    userService.releaseConnection();
+                    userService.setConnection(caseService.getConnection());
+                    List<User> doctors = null;
 
-                    Map<Integer, String> doctorNames = new HashMap<>();
+                    try {
+                        doctors = userService.getAllOfType(UserRole.DOCTOR);
+                        Map<Integer, String> doctorNames = new HashMap<>();
 
-                    for (User doctor : doctors) {
-                        if (doctor != null) {
-                            doctorNames.put(doctor.getId(), doctor.getSurname() + " " + doctor.getName() + " " + doctor.getPatronymic());
+                        for (User doctor : doctors) {
+                            if (doctor != null) {
+                                doctorNames.put(doctor.getId(), doctor.getSurname() + " " + doctor.getName() + " " + doctor.getPatronymic());
+                            }
                         }
+                        request.setAttribute(Parameters.DOCTOR_NAMES, doctorNames);
+
+                        PrescriptionService prescriptionService = (PrescriptionService) ServiceFactory.getService(ServiceType.PRESCRIPTION_SERVICE);
+                        prescriptionService.setConnection(caseService.getConnection());
+                        Map<Integer, List<Prescription>> prescriptionsByCaseId = new HashMap<>();
+
+                        for (Case cur : cases) {
+                            int currenctCaseId = cur.getId();
+                            try {
+                                List<Prescription> prescriptions = prescriptionService.getAllByCaseId(currenctCaseId);
+                                prescriptionsByCaseId.put(currenctCaseId, prescriptions);
+                            } catch (PrescriptionServiceException e) {
+                                logger.error(e.getMessage());
+                            }
+                        }
+                        request.setAttribute("prescriptions_by_case_id", prescriptionsByCaseId);
+
+                        logger.info("preparing profile page finished");
+                        page = Pages.VIEW_HISTORY;
+                    } catch (UserServiceException e) {
+                        logger.error(e.getMessage());
+                        request.getSession().setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
                     }
-                    request.setAttribute("doctor_names", doctorNames);
-
-                    PrescriptionService prescriptionService = (PrescriptionService) ServiceFactory.getService(ServiceType.PRESCRIPTION_SERVICE);
-                    prescriptionService.getConnection();
-                    Map<Integer, List<Prescription>> prescriptionsByCaseId = new HashMap<>();
-
-                    for (Case cur : cases) {
-                        int currenctCaseId = cur.getId();
-                        List<Prescription> prescriptions = prescriptionService.getAllByCaseId(currenctCaseId);
-                        prescriptionsByCaseId.put(currenctCaseId, prescriptions);
-                    }
-
-                    prescriptionService.releaseConnection();
-
-                    request.setAttribute("prescriptions_by_case_id", prescriptionsByCaseId);
-                    request.removeAttribute("patient");
-                    request.removeAttribute("card");
-                    request.removeAttribute("last_case");
-
-                    logger.info("preparing profile page finished");
+                    caseService.releaseConnection();
+                } else {
+                    request.setAttribute(Parameters.MESSAGE, Messages.NO_RESULTS);
                     page = Pages.VIEW_HISTORY;
                 }
+            }
         }
         return page;
     }

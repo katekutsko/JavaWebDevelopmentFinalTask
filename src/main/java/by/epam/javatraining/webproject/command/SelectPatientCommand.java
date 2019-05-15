@@ -7,9 +7,11 @@ import by.epam.javatraining.webproject.model.entity.User;
 import by.epam.javatraining.webproject.model.service.CaseService;
 import by.epam.javatraining.webproject.model.service.MedicalCardService;
 import by.epam.javatraining.webproject.model.service.UserService;
+import by.epam.javatraining.webproject.model.service.exception.ServiceException;
 import by.epam.javatraining.webproject.model.service.factory.ServiceFactory;
 import by.epam.javatraining.webproject.model.service.factory.ServiceType;
 import by.epam.javatraining.webproject.util.Pages;
+import by.epam.javatraining.webproject.util.Parameters;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,32 +31,33 @@ public class SelectPatientCommand implements Command {
         String page = Pages.ERROR_PAGE;
 
         if (type == ActionType.GET) {
-            String cardId = request.getParameter("card_id");
+            String cardId = request.getParameter(Parameters.CARD_ID);
             int id = Integer.parseInt(cardId);
 
             MedicalCardService cardService = (MedicalCardService) ServiceFactory.getService(ServiceType.MEDICAL_CARD_SERVICE);
-            cardService.getConnection();
-            MedicalCard card = (MedicalCard) cardService.getById(id);
-            cardService.releaseConnection();
+            cardService.takeConnection();
+            try {
+                MedicalCard card = (MedicalCard) cardService.getById(id);
 
-            if (card != null) {
-                UserService userService = (UserService) ServiceFactory.getService(ServiceType.USER_SERVICE);
-                userService.getConnection();
-                User user = (User) userService.getById(card.getUserID());
-                userService.releaseConnection();
+                if (card != null) {
+                    UserService userService = (UserService) ServiceFactory.getService(ServiceType.USER_SERVICE);
+                    userService.setConnection(cardService.getConnection());
+                    User user = (User) userService.getById(card.getUserID());
 
-                CaseService caseService = (CaseService) ServiceFactory.getService(ServiceType.CASE_SERVICE);
-                caseService.getConnection();
-                Case lastCase = caseService.getLastCaseByPatientId(id);
-                caseService.releaseConnection();
+                    CaseService caseService = (CaseService) ServiceFactory.getService(ServiceType.CASE_SERVICE);
+                    caseService.setConnection(cardService.getConnection());
+                    Case lastCase = caseService.getLastCaseByPatientId(id);
 
-                request.setAttribute("last_case", lastCase);
-                request.setAttribute("patient", user);
-                request.setAttribute("card", card);
+                    request.setAttribute(Parameters.LAST_CASE, lastCase);
+                    request.setAttribute(Parameters.PATIENT, user);
+                    request.setAttribute(Parameters.CARD, card);
 
-                page = Pages.FORWARD_VIEW_PATIENT;
-
+                    page = Pages.FORWARD_VIEW_PATIENT;
+                }
+            } catch (ServiceException e) {
+                logger.error(e.getMessage());
             }
+            cardService.releaseConnection();
         }
         return page;
     }

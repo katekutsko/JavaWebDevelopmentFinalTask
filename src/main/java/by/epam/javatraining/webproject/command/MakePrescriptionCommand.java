@@ -4,9 +4,11 @@ import by.epam.javatraining.webproject.controller.ActionType;
 import by.epam.javatraining.webproject.model.entity.Prescription;
 import by.epam.javatraining.webproject.model.entity.PrescriptionType;
 import by.epam.javatraining.webproject.model.service.PrescriptionService;
+import by.epam.javatraining.webproject.model.service.exception.ServiceException;
 import by.epam.javatraining.webproject.model.service.factory.ServiceFactory;
 import by.epam.javatraining.webproject.model.service.factory.ServiceType;
 import by.epam.javatraining.webproject.util.Pages;
+import by.epam.javatraining.webproject.util.Parameters;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,19 +29,16 @@ public class MakePrescriptionCommand implements Command {
 
         if (type == ActionType.POST) {
 
-            String patient = request.getParameter("card_id");
-            logger.debug("card id was " + patient);
-
-            String dateAsString = request.getParameter("date");
-            String details = request.getParameter("details");
-            String prescriptionType = request.getParameter("type");
-            String doctor = request.getParameter("doctor_id");
-            String caseId = request.getParameter("last_case_id");
+            String patient = request.getParameter(Parameters.CARD_ID);
+            String dateAsString = request.getParameter(Parameters.DATE);
+            String details = request.getParameter(Parameters.DETAILS);
+            String prescriptionType = request.getParameter(Parameters.TYPE);
+            String doctor = request.getParameter(Parameters.DOCTOR_ID);
+            String caseId = request.getParameter(Parameters.LAST_CASE_ID);
 
             logger.debug("data for validation: " + prescriptionType + doctor + patient + details + caseId);
 
-            if (prescriptionType != null && !doctor.equals("0") && !patient.equals("0") && !caseId.equals("0")) {
-
+            if (prescriptionType != null) {
                 PrescriptionType pType = PrescriptionType.valueOf(prescriptionType);
                 int patientID = Integer.parseInt(patient);
                 int doctorID = Integer.parseInt(doctor);
@@ -47,23 +46,22 @@ public class MakePrescriptionCommand implements Command {
 
                 Prescription prescription = new Prescription(patientID, doctorID, details, dateAsString, pType, caseID);
                 PrescriptionService prescriptionService = (PrescriptionService) ServiceFactory.getService(ServiceType.PRESCRIPTION_SERVICE);
-                prescriptionService.getConnection();
+                prescriptionService.takeConnection();
 
-                if(prescriptionService.add(prescription)) {
-                    page = Pages.REDIRECT_VIEW_PATIENT + "&card_id=" + patientID;
-                    logger.info("insertion was successful");
-                    request.removeAttribute("patient");
-                    request.removeAttribute("card");
-                    request.removeAttribute("last_case");
-                } else {
-                    logger.error("could not insert a prescription");
+                try {
+                    if (prescriptionService.add(prescription)) {
+                        page = Pages.REDIRECT_VIEW_PATIENT + "&card_id=" + patientID;
+                        logger.info("insertion was successful");
+                    }
+                } catch (ServiceException e) {
+                    logger.error("could not insert a prescription " + e.getMessage());
                 }
                 prescriptionService.releaseConnection();
             }
         } else {
             long now = new java.util.Date().getTime();
-            request.setAttribute("types", PrescriptionType.values());
-            request.setAttribute("date", new Date(now));
+            request.setAttribute(Parameters.TYPES, PrescriptionType.values());
+            request.setAttribute(Parameters.DATE, new Date(now));
             page = Pages.FORWARD_PRESCRIPTION_MAKING;
         }
         return page;

@@ -6,10 +6,14 @@ import by.epam.javatraining.webproject.model.entity.role.UserRole;
 import by.epam.javatraining.webproject.model.entity.User;
 import by.epam.javatraining.webproject.model.service.MedicalCardService;
 import by.epam.javatraining.webproject.model.service.UserService;
+import by.epam.javatraining.webproject.model.service.exception.MedicalCardServiceException;
+import by.epam.javatraining.webproject.model.service.exception.ServiceException;
 import by.epam.javatraining.webproject.model.service.factory.ServiceFactory;
 import by.epam.javatraining.webproject.model.service.factory.ServiceType;
+import by.epam.javatraining.webproject.util.Messages;
 import by.epam.javatraining.webproject.util.Pages;
 import by.epam.javatraining.webproject.model.validation.RegistrationValidation;
+import by.epam.javatraining.webproject.util.Parameters;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,86 +28,134 @@ public class EditProfileCommand implements Command {
 
     @Override
     public String execute(HttpServletRequest request, ActionType type) {
-        String page = null;
-
+        String page = Pages.REDIRECT_ERROR_PAGE;
         HttpSession session = request.getSession();
+
         if (type == ActionType.GET) {
             page = Pages.FORWARD_EDIT_PROFILE;
 
         } else {
-            User user = (User) session.getAttribute("user");
+            User user = (User) session.getAttribute(Parameters.USER);
 
             if (user != null) {
-                String name = request.getParameter("name");
-                String surname = request.getParameter("surname");
-                String patronymic = request.getParameter("patronymic");
-                String login = request.getParameter("login");
-                String oldPassword = request.getParameter("old_password");
-                String newPassword = request.getParameter("new_password");
-                String repeatNewPassword = request.getParameter("repeat_new_password");
 
-                if (RegistrationValidation.validateNameComponent(name)) {
-                    user.setName(name);
-                }
-                if (RegistrationValidation.validateNameComponent(surname)) {
-                    user.setSurname(surname);
-                }
-                if (RegistrationValidation.validateNameComponent(patronymic)) {
-                    user.setPatronymic(patronymic);
-                }
-                if (RegistrationValidation.validateLogin(login)) {
-                    user.setLogin(login);
-                }
-                if (!oldPassword.equals("") && !newPassword.equals("") && !repeatNewPassword.equals("")) {
+                String name = request.getParameter(Parameters.NAME);
+                String surname = request.getParameter(Parameters.SURNAME);
+                String patronymic = request.getParameter(Parameters.PATRONYMIC);
+                String login = request.getParameter(Parameters.LOGIN);
+                String oldPassword = request.getParameter(Parameters.OLD_PASSWORD);
+                String newPassword = request.getParameter(Parameters.NEW_PASSWORD);
+                String repeatNewPassword = request.getParameter(Parameters.REPEAT_NEW_PASSWORD);
 
-                    if (oldPassword.hashCode() == user.getPassword()) {
-
-                        if (RegistrationValidation.validatePassword(newPassword) && RegistrationValidation.validateRepeatPassword(newPassword,
-                                repeatNewPassword)) {
-                            user.setPassword(newPassword.hashCode());
-                        }
-                    }
-                }
                 UserService userService = (UserService) ServiceFactory.getService(ServiceType.USER_SERVICE);
-                userService.getConnection();
+                userService.takeConnection();
 
-                userService.setAutoCommit(false);
+                if (RegistrationValidation.validateNameComponent(name) &&
+                        RegistrationValidation.validateNameComponent(surname) &&
+                        RegistrationValidation.validateNameComponent(patronymic) &&
+                        RegistrationValidation.validateLogin(login)) {
 
-                if (userService.update(user)) {
-                    logger.info("user successfully updated: " + user);
+                    if (RegistrationValidation.checkLoginUniqueness(user, userService, login)) {
+                        user.setName(name);
+                        user.setSurname(surname);
+                        user.setPatronymic(patronymic);
+                        user.setLogin(login);
 
-                    if (user.getRole() == UserRole.PATIENT) {
-                        String dateOfBirth = request.getParameter("birth_date");
-                        String sex = request.getParameter("sex");
+                        if (!oldPassword.equals("") && !newPassword.equals("") && !repeatNewPassword.equals("")) {
 
-                        MedicalCardService cardService = (MedicalCardService) ServiceFactory.getService(ServiceType.MEDICAL_CARD_SERVICE);
-                        MedicalCard card = cardService.getByPatientId(user.getId());
+                            if (oldPassword.hashCode() == user.getPassword()) {
 
+                                if (RegistrationValidation.validatePassword(newPassword) && RegistrationValidation.validateRepeatPassword(newPassword,
+                                        repeatNewPassword)) {
+                                    user.setPassword(newPassword.hashCode());
+
+                                    if (updateUser(userService, request, user)) {
+                                        page = Pages.REDIRECT_VIEW_PROFILE;
+
+                                    } else {
+                                        session.setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
+                                    }
+                                } else {
+                                    session.setAttribute(Parameters.ERROR, Messages.INCORRECT_PASSWORD);
+                                }
+                            } else {
+                                session.setAttribute(Parameters.ERROR, Messages.INCORRECT_PASSWORD);
+                            }
+                        } else if (oldPassword.equals("") && newPassword.equals("") && repeatNewPassword.equals("")) {
+                            if (updateUser(userService, request, user)) {
+                                page = Pages.REDIRECT_VIEW_PROFILE;
+                            } else {
+                                session.setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
+                            }
+                        } else {
+                            session.setAttribute(Parameters.ERROR, Messages.INCORRECT_PASSWORD);
+                        }
+                    } else {
+                        session.setAttribute(Parameters.ERROR, Messages.LOGIN_EXISTS);
+                    }
+                } else {
+                    session.setAttribute(Parameters.ERROR, Messages.INVALID_DATA);
+                }
+
+
+            }
+        }
+        return page;
+    }
+
+    private boolean updateUser(UserService userService, HttpServletRequest request, User user) {
+
+        boolean result = false;
+        HttpSession session = request.getSession();
+        userService.setAutoCommit(false);
+
+        try {
+
+            if (userService.update(user)) {
+                logger.info("user successfully updated: " + user);
+
+                if (user.getRole() == UserRole.PATIENT) {
+                    String dateOfBirth = request.getParameter(Parameters.BIRTH_DATE);
+                    String sex = request.getParameter(Parameters.SEX);
+
+                    MedicalCardService cardService = (MedicalCardService) ServiceFactory.getService(ServiceType.MEDICAL_CARD_SERVICE);
+                    cardService.setConnection(userService.getConnection());
+                    MedicalCard card = null;
+
+                    try {
+                        card = cardService.getByPatientId(user.getId());
                         if (card != null) {
                             card.setDateOfBirth(dateOfBirth);
                             card.setSex(Byte.parseByte(sex));
 
                             if (cardService.update(card)) {
-                                session.removeAttribute("user");
-                                session.removeAttribute("card");
-                                session.setAttribute("user", user);
-                                session.setAttribute("card", card);
+                                session.removeAttribute(Parameters.USER);
+                                session.removeAttribute(Parameters.CARD);
+                                session.setAttribute(Parameters.USER, user);
+                                session.setAttribute(Parameters.CARD, card);
+                                result = true;
                                 logger.info("card updated: " + card);
                             } else {
                                 userService.rollback();
                             }
                         }
-                        cardService.releaseConnection();
-                    } else {
-                        session.removeAttribute("user");
-                        session.setAttribute("user", user);
+                    } catch (MedicalCardServiceException e) {
+                        logger.error(e.getMessage());
+                        session.setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
                     }
-                    userService.setAutoCommit(true);
-                    userService.releaseConnection();
+                } else {
+                    session.removeAttribute(Parameters.USER);
+                    session.setAttribute(Parameters.USER, user);
+                    result = true;
                 }
-                page = Pages.REDIRECT_VIEW_PROFILE;
+            } else {
+                session.setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
             }
+        } catch (ServiceException e) {
+            logger.error(e.getMessage());
         }
-        return page;
+        userService.setAutoCommit(true);
+        userService.releaseConnection();
+        return result;
     }
 }

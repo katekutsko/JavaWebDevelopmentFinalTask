@@ -4,10 +4,12 @@ import by.epam.javatraining.webproject.controller.ActionType;
 import by.epam.javatraining.webproject.model.entity.User;
 import by.epam.javatraining.webproject.model.entity.role.UserRole;
 import by.epam.javatraining.webproject.model.service.UserService;
+import by.epam.javatraining.webproject.model.service.exception.UserServiceException;
 import by.epam.javatraining.webproject.model.service.factory.ServiceFactory;
 import by.epam.javatraining.webproject.model.service.factory.ServiceType;
 import by.epam.javatraining.webproject.util.Messages;
 import by.epam.javatraining.webproject.util.Pages;
+import by.epam.javatraining.webproject.util.Parameters;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,18 +31,25 @@ public class ViewAllUsersCommand implements Command {
 
         if (type == ActionType.GET) {
             UserService userService = (UserService) ServiceFactory.getService(ServiceType.USER_SERVICE);
-            userService.getConnection();
+            userService.takeConnection();
 
-            List<User> userList = userService.getAll();
+            List<User> userList = null;
 
-            if (userList != null) {
-                request.setAttribute("users", userList);
-                request.setAttribute("roles", UserRole.values());
-                page = Pages.VIEW_USERS;
-            } else {
-                request.setAttribute("errorMessage", Messages.NO_RESULTS);
+            try {
+                userList = userService.getAll();
+                if (userList != null) {
+                    request.setAttribute(Parameters.USERS, userList);
+                    request.setAttribute(Parameters.ROLES, UserRole.values());
+                    page = Pages.VIEW_USERS;
+                } else {
+                    request.setAttribute(Parameters.ERROR, Messages.NO_RESULTS);
+                }
+            } catch (UserServiceException e) {
+                logger.error(e.getMessage());
+                request.getSession().setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
+            } finally {
+                userService.releaseConnection();
             }
-            userService.releaseConnection();
         }
         return page;
     }

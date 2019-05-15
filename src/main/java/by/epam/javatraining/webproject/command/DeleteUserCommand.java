@@ -1,20 +1,23 @@
 package by.epam.javatraining.webproject.command;
 
 import by.epam.javatraining.webproject.controller.ActionType;
-import by.epam.javatraining.webproject.model.dao.connection.ConnectionPool;
-import by.epam.javatraining.webproject.model.dao.factory.DAOFactory;
-import by.epam.javatraining.webproject.model.dao.factory.DAOType;
-import by.epam.javatraining.webproject.model.dao.implementation.CaseDAO;
-import by.epam.javatraining.webproject.model.dao.implementation.MedicalCardDAO;
-import by.epam.javatraining.webproject.model.dao.implementation.PrescriptionDAO;
-import by.epam.javatraining.webproject.model.dao.implementation.UserDAO;
 import by.epam.javatraining.webproject.model.entity.Case;
 import by.epam.javatraining.webproject.model.entity.MedicalCard;
 import by.epam.javatraining.webproject.model.entity.Prescription;
 import by.epam.javatraining.webproject.model.entity.User;
 import by.epam.javatraining.webproject.model.entity.role.UserRole;
-import by.epam.javatraining.webproject.model.exception.*;
+import by.epam.javatraining.webproject.model.service.CaseService;
+import by.epam.javatraining.webproject.model.service.MedicalCardService;
+import by.epam.javatraining.webproject.model.service.PrescriptionService;
+import by.epam.javatraining.webproject.model.service.UserService;
+import by.epam.javatraining.webproject.model.service.exception.CaseServiceException;
+import by.epam.javatraining.webproject.model.service.exception.MedicalCardServiceException;
+import by.epam.javatraining.webproject.model.service.exception.ServiceException;
+import by.epam.javatraining.webproject.model.service.factory.ServiceFactory;
+import by.epam.javatraining.webproject.model.service.factory.ServiceType;
+import by.epam.javatraining.webproject.util.Messages;
 import by.epam.javatraining.webproject.util.Pages;
+import by.epam.javatraining.webproject.util.Parameters;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,98 +34,100 @@ public class DeleteUserCommand implements Command {
     @Override
     public String execute(HttpServletRequest request, ActionType type) {
 
-        String page = Pages.ERROR_PAGE;
+        String page = Pages.REDIRECT_ERROR_PAGE;
 
-        if (type == ActionType.POST) {
+        String id = request.getParameter(Parameters.USER_ID);
+        logger.debug("id of user being deleted is " + id);
 
-            String id = request.getParameter("user_id");
-            logger.debug("id of user being deleted is " + id);
+        if (id != null) {
+            int userId = Integer.parseInt(id);
 
-            if (id != null){
-                UserDAO userDAO = (UserDAO) DAOFactory.getDAO(DAOType.USER_DAO);
-                ConnectionPool pool = ConnectionPool.getInstance();
-                userDAO.getConnection(pool);
-                int userId = Integer.parseInt(id);
+            UserService userService = (UserService) ServiceFactory.getService(ServiceType.USER_SERVICE);
+            userService.takeConnection();
+            MedicalCardService cardService = (MedicalCardService) ServiceFactory.getService(ServiceType.MEDICAL_CARD_SERVICE);
+            PrescriptionService prescriptionService = (PrescriptionService) ServiceFactory.getService(ServiceType.PRESCRIPTION_SERVICE);
+            CaseService caseService = (CaseService) ServiceFactory.getService(ServiceType.CASE_SERVICE);
 
-                MedicalCardDAO cardDAO = (MedicalCardDAO) DAOFactory.getDAO(DAOType.MEDICAL_CARD_DAO);
-                PrescriptionDAO prescriptionDAO = (PrescriptionDAO) DAOFactory.getDAO(DAOType.PRESCRIPTION_DAO);
-                CaseDAO caseDAO = (CaseDAO) DAOFactory.getDAO(DAOType.CASE_DAO);
+            User user = null;
+            try {
+                user = (User) userService.getById(userId);
+            } catch (ServiceException e) {
+                logger.error("could not get user by id " + id);
+            }
 
-                try {
-                    User user = (User) userDAO.getById(userId);
-
-                    if (user != null){
-
-                        if (user.getRole() == UserRole.PATIENT) {
-
-                            userDAO.setAutoCommit(false);
-                            userDAO.delete(user);
-
-                            cardDAO.getConnection(pool);
-                            cardDAO.setAutoCommit(false);
-                            caseDAO.getConnection(pool);
-                            caseDAO.setAutoCommit(false);
-                            prescriptionDAO.getConnection(pool);
-                            prescriptionDAO.setAutoCommit(false);
-
-                            MedicalCard card = null;
-                            try {
-                                card = cardDAO.getByPatientId(userId);
-                            } catch (MedicalCardDAOException e) {
-                                e.printStackTrace();
-                            }
+            if (user != null) {
+                if (user.getRole() == UserRole.PATIENT) {
+                    userService.setAutoCommit(false);
+                    try {
+                        if (userService.delete(user)) {
+                            cardService.setConnection(userService.getConnection());
+                            MedicalCard card = cardService.getByPatientId(userId);
 
                             if (card != null) {
+                                prescriptionService.setConnection(userService.getConnection());
+                                List<Prescription> prescriptionList = prescriptionService.getByPatientId(card.getId());
 
-                                List<Prescription> prescriptionList = prescriptionDAO.getByPatientId(card.getId());
-                                List<Case> caseList = caseDAO.getAllCasesOfCertainPatient(card.getId());
+                                caseService.setConnection(userService.getConnection());
+                                List<Case> caseList = caseService.getAllCasesOfCertainPatient(card.getId());
 
-                                for (Prescription prescription : prescriptionList) {
-                                    prescriptionDAO.delete(prescription);
-                                    logger.debug("deleting prescription");
+                                if (clearPatientData(prescriptionService, caseService, cardService, prescriptionList, caseList, card)) {
+                                    userService.commit();
+                                    page = Pages.REDIRECT_VIEW_USERS;
+
+                                } else {
+                                    userService.rollback();
+                                    request.getSession().setAttribute(Parameters.ERROR, Messages.ACTION_NOT_PERFORMED);
+                                    logger.error("could not delete user");
                                 }
-                                for (Case currentCase : caseList) {
-                                    caseDAO.delete(currentCase);
-                                    logger.debug("deleting case");
-                                }
-                                cardDAO.delete(card);
-                                logger.debug("deleting card");
-
-                                prescriptionDAO.commit();
-                                caseDAO.commit();
-                                cardDAO.commit();
-                                userDAO.commit();
-
-                                userDAO.setAutoCommit(true);
-                                prescriptionDAO.setAutoCommit(true);
-                                caseDAO.setAutoCommit(true);
-                                cardDAO.setAutoCommit(true);
-                                page = Pages.REDIRECT_VIEW_USERS;
-
                             }
-                        } else {
-                            userDAO.delete(user);
-                            page = Pages.REDIRECT_VIEW_USERS;
                         }
+                    } catch (ServiceException e) {
+                        logger.error("could not delete user: " + e.getMessage());
+                        userService.rollback();
+                        request.getSession().setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
+                    } finally {
+                        userService.setAutoCommit(true);
+                        userService.releaseConnection();
                     }
-
-                } catch (UserDAOException | PrescriptionDAOException | CommitException | CaseDAOException e) {
-                    prescriptionDAO.rollback();
-                    caseDAO.rollback();
-                    cardDAO.rollback();
-                    userDAO.rollback();
-                    logger.error(e.getMessage());
-
-                    page = Pages.ERROR_PAGE;
-
-                } finally {
-                    cardDAO.releaseConnection(pool);
-                    caseDAO.releaseConnection(pool);
-                    prescriptionDAO.releaseConnection(pool);
-                    userDAO.releaseConnection(pool);
+                } else {
+                    try {
+                        userService.delete(user);
+                        page = Pages.REDIRECT_VIEW_USERS;
+                    } catch (ServiceException e) {
+                        logger.error("could not delete user");
+                    }
+                    userService.releaseConnection();
                 }
             }
         }
         return page;
+    }
+
+    private boolean clearPatientData(PrescriptionService prescriptionService, CaseService caseService, MedicalCardService cardService, List<Prescription> prescriptionList, List<Case> caseList, MedicalCard card) {
+
+        boolean next = true;
+
+        try {
+            for (Prescription prescription : prescriptionList) {
+                if (!prescriptionService.delete(prescription)) {
+                    next = false;
+                    logger.debug("error deleting prescription");
+                }
+            }
+
+            for (Case currentCase : caseList) {
+                if (!caseService.delete(currentCase)) {
+                    next = false;
+                    logger.debug("error deleting case");
+                }
+            }
+            if (cardService.delete(card)) {
+                logger.debug("deleting card");
+                next = false;
+            }
+        } catch (ServiceException e) {
+            next = false;
+        }
+        return next;
     }
 }
