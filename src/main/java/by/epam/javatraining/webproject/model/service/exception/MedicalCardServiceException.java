@@ -1,6 +1,6 @@
 package by.epam.javatraining.webproject.model.service.exception;
 
-public class MedicalCardServiceException extends Exception {
+public class MedicalCardServiceException extends ServiceException {
 
     public MedicalCardServiceException(String message) {
     }

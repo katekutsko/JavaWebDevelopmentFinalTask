@@ -1,6 +1,6 @@
 package by.epam.javatraining.webproject.model.service.exception;
 
-public class UserServiceException extends Exception {
+public class UserServiceException extends ServiceException {
     public UserServiceException() {
     }
 
