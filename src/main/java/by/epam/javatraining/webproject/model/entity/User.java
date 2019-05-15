@@ -2,6 +2,8 @@ package by.epam.javatraining.webproject.model.entity;
 
 import by.epam.javatraining.webproject.model.entity.role.UserRole;
 
+import java.util.Objects;
+
 public class User extends Entity {
 
     private String login;
@@ -80,6 +82,24 @@ public class User extends Entity {
 
     public void setRole(UserRole role) {
         this.role = role;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return password == user.password &&
+                Objects.equals(login, user.login) &&
+                Objects.equals(name, user.name) &&
+                Objects.equals(surname, user.surname) &&
+                Objects.equals(patronymic, user.patronymic) &&
+                role == user.role;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(login, password, name, surname, patronymic, role);
     }
 
     @Override
