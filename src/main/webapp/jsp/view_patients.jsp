@@ -21,6 +21,9 @@
 
         <div id="content">
             <div id="centerbar_container">
+                <c:if test="${empty patients}">
+                    <p> <fmt:message key="no_results"/> </p>
+                </c:if>
                 <c:forEach var="i" begin="${from}" end="${to}">
                     <c:if test="${not empty patients[i]}">
                     <div class="centerbar_top"></div>
@@ -68,19 +71,7 @@
                     <div class="centerbar_base"></div>
                     </c:if>
                 </c:forEach>
-                <c:if test="${(from + size) < amount}">
-                    <a style="float: right; margin-top: 20px; margin-right: 70px;" href="<c:url value="${requestScope['javax.servlet.forward.servlet_path']}">
-                    <c:param name='from' value="${from + size}"/>
-
-                       <c:param name="command" value="${param.command}"/> </c:url>">
-                        <fmt:message key="next"/> </a>
-                </c:if>
-                <c:if test="${(from - size) ge 0}">
-                    <a style="float: left; margin-top: 20px;" href="<c:url value="${requestScope['javax.servlet.forward.servlet_path']}">
-                    <c:param name='from' value="${from - size}"/>
-                       <c:param name="command" value="${param.command}"/> </c:url>">
-                        <fmt:message key="previous"/> </a>
-                </c:if>
+                <ctg:changePage from="${from}" size="${size}" amount="${amount}" command="${param.command}"/>
             </div>
         </div>
     </div>
