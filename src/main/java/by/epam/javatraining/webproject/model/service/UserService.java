@@ -30,17 +30,15 @@ public class UserService extends Service {
         }
     }
 
-    public boolean addUser(User newUser) throws UserServiceException {
-        boolean result = false;
+    public void addUser(User newUser) throws UserServiceException {
 
         try {
             userDAO.insert(newUser);
-            result = true;
+
         } catch (UserDAOException e) {
             logger.error(e.getMessage());
             throw new UserServiceException(e.getMessage());
         }
-        return result;
     }
 
     public int getIdByLogin(String login) throws UserServiceException {

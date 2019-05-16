@@ -18,7 +18,9 @@
                 <div class="centerbar_top"></div>
                 <div class="centerbar">
                     <div class="centerbar_item">
-                        <p style="color: #F00; padding-right: 70px;"><fmt:message key="${error}"/></p>
+                        <c:forEach items="${error}" var="item">
+                            <p style="color: #F00; padding-right: 70px;"><fmt:message key="${item}"/></p>
+                        </c:forEach>
                     </div>
                 </div>
                 <div class="centerbar_base"></div>

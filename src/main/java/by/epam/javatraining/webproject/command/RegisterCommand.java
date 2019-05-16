@@ -18,9 +18,12 @@ import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RegisterCommand implements Command {
 
+    private final static int VALIDATION_PARAMETERS_AMOUNT = 4;
     private Logger logger;
 
     {
@@ -35,6 +38,8 @@ public class RegisterCommand implements Command {
 
         if (type == ActionType.POST) {
 
+            session.removeAttribute(Parameters.ERROR);
+
             String name = request.getParameter(Parameters.NAME);
             String surname = request.getParameter(Parameters.SURNAME);
             String patronymic = request.getParameter(Parameters.PATRONYMIC);
@@ -42,17 +47,16 @@ public class RegisterCommand implements Command {
             String password = request.getParameter(Parameters.PASSWORD);
             String repeatPassword = request.getParameter(Parameters.REPEAT_PASSWORD);
 
-            if (RegistrationValidation.validateNameComponent(name) && RegistrationValidation.validateNameComponent(surname)
-                    && RegistrationValidation.validateNameComponent(patronymic) && RegistrationValidation.validateLogin(login)
-                    && RegistrationValidation.validatePassword(password) &&
-                    RegistrationValidation.validateRepeatPassword(repeatPassword, password)) {
+            login = login.trim();
+            List<String> errorMessages = formErrorMessage(name, surname, patronymic, password, repeatPassword, login);
 
-                UserService userService = (UserService) ServiceFactory.getService(ServiceType.USER_SERVICE);
-                userService.takeConnection();
-                User user = (User) session.getAttribute(Parameters.USER);
+            if (errorMessages.isEmpty()) {
 
                 try {
-                    login = login.trim();
+                    UserService userService = (UserService) ServiceFactory.getService(ServiceType.USER_SERVICE);
+                    userService.takeConnection();
+                    User user = (User) session.getAttribute(Parameters.USER);
+
                     if (userService.login(login) == null) {
 
                         String role = request.getParameter(Parameters.ROLE);
@@ -63,49 +67,76 @@ public class RegisterCommand implements Command {
                         }
 
                         User newUser = new User(userRole, login, password.hashCode(), name, surname, patronymic);
-                        userService.setAutoCommit(false);
 
-                        if (userService.addUser(newUser)) {
+                        userService.addUser(newUser);
 
-                            if (user == null) {
-                                String sex = request.getParameter(Parameters.SEX);
-                                String dateOfBirth = request.getParameter(Parameters.DATE);
-                                user = userService.login(login);
-                                int userId = user.getId();
+                        if (user == null) {
+                            userService.setAutoCommit(false);
 
-                                MedicalCardService cardService = (MedicalCardService) ServiceFactory.getService(ServiceType.MEDICAL_CARD_SERVICE);
-                                cardService.setConnection(userService.getConnection());
-                                MedicalCard card = new MedicalCard(userId, dateOfBirth, Byte.parseByte(sex));
+                            String sex = request.getParameter(Parameters.SEX);
+                            String dateOfBirth = request.getParameter(Parameters.DATE);
+                            user = userService.login(login);
+                            int userId = user.getId();
 
-                                if (cardService.addCard(card) && userService.commit()) {
-                                    int cardId = cardService.getIdByUserId(userId);
+                            MedicalCardService cardService = (MedicalCardService) ServiceFactory.getService(ServiceType.MEDICAL_CARD_SERVICE);
+                            cardService.setConnection(userService.getConnection());
+                            MedicalCard card = new MedicalCard(userId, dateOfBirth, Byte.parseByte(sex));
 
-                                    if (cardId != 0) {
-                                        card.setId(cardId);
-                                        session.setAttribute(Parameters.CARD, card);
-                                        session.setAttribute(Parameters.USER, user);
-                                    }
-                                } else {
-                                    userService.rollback();
-                                }
+                            if (cardService.addCard(card) && userService.commit()) {
+                                int cardId = cardService.getIdByUserId(userId);
+                                card.setId(cardId);
+                                session.setAttribute(Parameters.CARD, card);
+                                session.setAttribute(Parameters.USER, user);
+                                page = Pages.REDIRECT_VIEW_PROFILE;
+
+                            } else {
+                                userService.rollback();
+                                session.setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
                             }
-                            userService.setAutoCommit(true);
-                            userService.releaseConnection();
-                            page = Pages.REDIRECT_VIEW_PROFILE;
+                        } else {
+                            page = Pages.VIEW_USERS;
                         }
+                        userService.releaseConnection();
                     } else {
-                        return Pages.REDIRECT_LOGIN + "&" + Parameters.LOGIN + "=" + login;
+                        session.setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
                     }
+                    userService.setAutoCommit(true);
                 } catch (UserServiceException | MedicalCardServiceException e) {
                     session.setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
                 }
             } else {
-                session.setAttribute(Parameters.ERROR, Messages.INVALID_DATA);
+                session.setAttribute(Parameters.ERROR, errorMessages);
             }
         } else {
             session.setAttribute(Parameters.ROLES, UserRole.values());
             page = Pages.REGISTRATION;
         }
         return page;
+    }
+
+    private List<String> formErrorMessage(String name, String surname, String patronymic, String password,
+                                    String repeatPassword, String login) {
+
+        boolean[] check = new boolean[VALIDATION_PARAMETERS_AMOUNT];
+        check[0] = (RegistrationValidation.validateNameComponent(name)
+                && RegistrationValidation.validateNameComponent(surname) && RegistrationValidation.validateNameComponent(patronymic));
+        check[1] = RegistrationValidation.validatePassword(password);
+        check[2] = RegistrationValidation.validateRepeatPassword(repeatPassword, password);
+        check[3] = RegistrationValidation.validateLogin(login);
+
+        String[] errorMessages = new String[4];
+        errorMessages[0] = Messages.INVALID_NAME;
+        errorMessages[1] = Messages.INVALID_PASSWORD;
+        errorMessages[2] = Messages.INCONSISTENT_PASSWORDS;
+        errorMessages[3] = Messages.INVALID_LOGIN;
+
+        List<String> errors = new ArrayList<>();
+
+        for (int i = 0; i < VALIDATION_PARAMETERS_AMOUNT; i++) {
+            if (!check[i]) {
+                errors.add(errorMessages[i]);
+            }
+        }
+        return errors;
     }
 }

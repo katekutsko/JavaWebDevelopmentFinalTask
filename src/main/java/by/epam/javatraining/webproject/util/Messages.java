@@ -16,6 +16,11 @@ public class Messages {
     public static final String INVALID_DATA = "invalid_data";
     public static final String INCORRECT_PASSWORD = "incorrect_password";
     public static final String LOGIN_EXISTS = "login_exists";
+    public static final String INVALID_NAME = "invalid_name";
+    public static final String INVALID_LOGIN = "invalid_login";
+    public static final String INVALID_PASSWORD = "invalid_password";
+    public static final String INCONSISTENT_PASSWORDS = "inconsistent_passwords";
+
 
     private static ResourceBundle resourceBundle;
     private static Locale locale;
