@@ -57,6 +57,8 @@ public class SearchCommand implements Command {
                 }
             } catch (UserServiceException e) {
                 logger.error("search failed: " + e.getMessage());
+            } finally {
+                userService.releaseConnection();
             }
         }
         return page;

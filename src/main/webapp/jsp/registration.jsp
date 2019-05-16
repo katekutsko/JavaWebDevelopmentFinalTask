@@ -21,6 +21,7 @@
                         <form method="POST" action="Hospital">
                             <div align="center">
                                 <input type="hidden" name="command" value="register"/>
+                                <c:if test="${not empty error}"> <fmt:message key="${error}"/> </c:if> </br>
                                 <fmt:message key="surname"/><p><input type="text" name="surname" maxlength="20"
                                                                        autocomplete="off"/></p>
                                 <fmt:message key="name"/> <p><input type="text" name="name" maxlength="20"

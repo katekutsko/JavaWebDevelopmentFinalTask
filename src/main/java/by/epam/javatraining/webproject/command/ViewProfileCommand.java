@@ -33,12 +33,11 @@ public class ViewProfileCommand implements Command {
                     if (user.getRole() == UserRole.PATIENT) {
                         cardService.takeConnection();
                         MedicalCard card = cardService.getByPatientId(user.getId());
+                        cardService.releaseConnection();
                         request.getSession().setAttribute(Parameters.MEDICAL_CARD, card);
                     }
                 } catch (MedicalCardServiceException e) {
                     logger.error(e.getMessage());
-                } finally {
-                    cardService.releaseConnection();
                 }
                 page = Pages.FORWARD_VIEW_PROFILE;
             }

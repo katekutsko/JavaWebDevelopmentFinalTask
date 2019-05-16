@@ -84,7 +84,7 @@ public class UserService extends Service {
         } else {
             users = getAll();
         }
-        Map<Byte, User> foundUsers = new TreeMap<>();
+        List<User> foundUsers = new ArrayList<>();
 
         if (users != null && name != null && !name.isEmpty()) {
             String[] nameParts = name.split("\\s");
@@ -102,10 +102,10 @@ public class UserService extends Service {
                     }
                 }
                 if (count >= 1) {
-                    foundUsers.put(count, user);
+                    foundUsers.add(user);
                 }
             }
         }
-        return new ArrayList<User>(foundUsers.values());
+        return foundUsers;
     }
 }

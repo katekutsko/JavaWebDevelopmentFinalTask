@@ -29,15 +29,23 @@
                                     <tr>
                                         <td colspan="2" style="text-align : center">
                                             <c:set var="j" value="${i}"/>
-                                            <p>${ doctors[j].name } ${ doctors[j].surname } ${ doctors[j].patronymic } </p>
+                                            ${ doctors[j].name } ${ doctors[j].surname } ${ doctors[j].patronymic }
                                         </td>
                                     </tr>
                                     <tr>
                                         <td width="50%">
-                                            <p><fmt:message key="email"/></p>
+                                            <fmt:message key="email"/>
                                         </td>
                                         <td align="center">
-                                            <p> ${ doctors[j].login }</p>
+                                            ${ doctors[j].login }
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="50%">
+                                           <fmt:message key="category"/>
+                                        </td>
+                                        <td align="center">
+                                           <fmt:message key="${ doctors[j].role }"/>
                                         </td>
                                     </tr>
                                 </table>

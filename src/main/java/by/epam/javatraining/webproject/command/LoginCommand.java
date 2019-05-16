@@ -29,7 +29,7 @@ public class LoginCommand implements Command {
     @Override
     public String execute(HttpServletRequest request, ActionType type) {
 
-        String page = null;
+        String page = Pages.REDIRECT_ERROR_PAGE;
         HttpSession session = request.getSession();
 
         if (type == ActionType.POST) {
@@ -62,27 +62,25 @@ public class LoginCommand implements Command {
                             page = Pages.REDIRECT_VIEW_PROFILE;
                         } else {
                             logger.info("wrong password");
-                            request.removeAttribute(Parameters.LOGIN_ERROR);
-                            request.setAttribute(Parameters.PASSWORD_ERROR, Messages.WRONG_PASSWORD);
+                            session.removeAttribute(Parameters.ERROR);
+                            session.setAttribute(Parameters.ERROR, Messages.WRONG_PASSWORD);
                         }
                     } else {
                         logger.info("wrong login");
-                        request.removeAttribute(Parameters.LOGIN_ERROR);
-                        request.setAttribute(Parameters.LOGIN_ERROR, Messages.WRONG_LOGIN);
+                        session.removeAttribute(Parameters.ERROR);
+                        session.setAttribute(Parameters.ERROR, Messages.WRONG_LOGIN);
                     }
                 } catch (UserServiceException | MedicalCardServiceException e) {
-                    page = Pages.ERROR_PAGE;
                     logger.error(e.getMessage());
                     session.setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
                 } finally {
                     userService.releaseConnection();
                 }
             } else {
-                request.setAttribute(Parameters.LOGIN_ERROR, Messages.FIELDS_NOT_FILLED);
+                session.setAttribute(Parameters.ERROR, Messages.FIELDS_NOT_FILLED);
             }
         } else {
-            request.removeAttribute(Parameters.LOGIN_ERROR);
-            request.removeAttribute(Parameters.PASSWORD_ERROR);
+            page = Pages.LOGIN;
         }
         return page;
     }

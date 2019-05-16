@@ -4,6 +4,7 @@ import by.epam.javatraining.webproject.command.Command;
 import by.epam.javatraining.webproject.command.CommandManager;
 import by.epam.javatraining.webproject.command.CommandType;
 import by.epam.javatraining.webproject.command.RegisterCommand;
+import by.epam.javatraining.webproject.util.Messages;
 import by.epam.javatraining.webproject.util.Pages;
 import by.epam.javatraining.webproject.util.Parameters;
 import org.apache.log4j.Logger;
@@ -41,30 +42,20 @@ public class Controller extends HttpServlet {
 
             String page = command.execute(request, type);
 
-            if (page != null) {
-                try {
-                    if (type == ActionType.GET) {
-                        logger.debug("forwarded to " + page);
-                        request.getRequestDispatcher(page).forward(request, response);
-                    } else {
-                        logger.debug("redirected to " + page);
-                        response.sendRedirect(request.getContextPath() + "/" + page);
-                    }
-                } catch (ServletException | IOException e) {
-                    logger.error("exception in servlet: " + e.getMessage());
+            try {
+                if (type == ActionType.GET) {
+                    logger.debug("forwarded to " + page);
+                    request.getRequestDispatcher(page).forward(request, response);
+                } else {
+                    logger.debug("redirected to " + page);
+                    response.sendRedirect(request.getContextPath() + "/" + page);
                 }
-            } else {
-                try {
-                    if (request.getSession().getAttribute(Parameters.USER) != null) {
-                       request.getSession().invalidate();
-                    } 
-                    request.getRequestDispatcher(Pages.LOGIN).forward(request, response);
-                } catch (ServletException | IOException e) {
-                    logger.error(e.getMessage());
-                }
+            } catch (ServletException | IOException e) {
+                logger.error("exception in servlet: " + e.getMessage());
             }
         } else {
             try {
+                request.setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
                 request.getRequestDispatcher(Pages.ERROR_PAGE).forward(request, response);
             } catch (ServletException | IOException e) {
                 logger.error(e.getMessage());
