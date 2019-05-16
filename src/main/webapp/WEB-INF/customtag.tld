@@ -4,16 +4,48 @@
         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd"
         version="2.0">
 
-    <description>Custom Tag for diagnoses</description>
+    <description>Custom Tags for hospital webapp</description>
     <tlib-version>2.1</tlib-version>
     <short-name>ctg</short-name>
     <uri>/WEB-INF/customtag</uri>
 
     <tag>
-        <description>Tag enables choice of a diagnosis from list. </description>
+        <description>Tag enables choice of a diagnosis from list.</description>
         <name>diagnoses</name>
         <tag-class>by.epam.javatraining.webproject.customtag.DiagnosesTag</tag-class>
         <body-content>empty</body-content>
+    </tag>
+
+    <tag>
+        <description>Tag enables transfer from one page of data to another.</description>
+        <name>changePage</name>
+        <tag-class>by.epam.javatraining.webproject.customtag.ChangePagesTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <description>Number of starting element</description>
+            <name>from</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <description>Size of a page</description>
+            <name>size</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <description>Size of a data array</description>
+            <name>amount</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <description>Current command</description>
+            <name>command</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+            <type>java.lang.String</type>
+        </attribute>
     </tag>
 
 </taglib>
