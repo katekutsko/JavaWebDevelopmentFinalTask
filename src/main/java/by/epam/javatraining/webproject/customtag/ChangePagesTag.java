@@ -19,6 +19,30 @@ public class ChangePagesTag extends SimpleTagSupport {
     private int size;
     private int amount;
     private String command;
+    private String name;
+    private int cardId;
+
+    private static final String NEXT_ARROW = ">>";
+    private static final String PREVIOUS_ARROW = "<<";
+    private static final String INDENT = "margin-right: 80px;";
+    private static final String FLOAT_RIGHT = "right";
+    private static final String FLOAT_LEFT = "left";
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getCardId() {
+        return cardId;
+    }
+
+    public void setCardId(int cardId) {
+        this.cardId = cardId;
+    }
 
     public String getCommand() {
         return command;
@@ -69,13 +93,20 @@ public class ChangePagesTag extends SimpleTagSupport {
         JspWriter out = getJspContext().getOut();
         if (isNext()) {
             int newFrom = from + size;
-            out.println("<a style=\"float: right; margin-top: 20px; margin-right: 80px;\" href=\"Hospital?command=" + command + "&from="+ newFrom +"\">");
-            out.println(">></a>");
+            createArrow(out, INDENT, FLOAT_RIGHT, NEXT_ARROW, newFrom);
         }
         if (isPrevious()) {
             int newFrom = from - size;
-            out.println("<a style=\"float: left; margin-top: 20px;\" href=\"Hospital?command=" + command + "&from="+ newFrom +"\">");
-            out.println("<<</a>");
+            createArrow(out, "", FLOAT_LEFT, PREVIOUS_ARROW, newFrom);
         }
+    }
+
+    private void createArrow(JspWriter out, String indent, String floatSide, String arrow, int newFrom) throws IOException {
+        out.println("<a style=\"float: " + floatSide + "; margin-top: 20px;" + indent + "\" href=\"Hospital?command=" + command + "&from=" + newFrom);
+        if (name != null && cardId != 0) {
+            out.print(" name=" + name + " card_id=" + cardId);
+        }
+        out.print("\">");
+        out.println(arrow + "</a>");
     }
 }

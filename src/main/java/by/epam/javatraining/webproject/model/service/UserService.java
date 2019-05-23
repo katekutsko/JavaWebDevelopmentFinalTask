@@ -30,6 +30,23 @@ public class UserService extends Service {
         }
     }
 
+    public String getNameByID(int id) throws UserServiceException {
+
+        User user = null;
+        try {
+            user = (User) userDAO.getById(id);
+            String name = null;
+            if (user != null){
+                name = user.getSurname() + " " + user.getName() + " " + user.getPatronymic();
+            }
+            return name;
+        } catch (UserDAOException e) {
+            logger.error(e.getMessage());
+            throw new UserServiceException();
+        }
+
+    }
+
     public void addUser(User newUser) throws UserServiceException {
 
         try {

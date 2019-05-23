@@ -8,6 +8,4 @@ import java.util.List;
 public interface IMedicalCardDAO extends IDAO {
 
     MedicalCard getByPatientId(int userId) throws MedicalCardDAOException;
-    MedicalCard getByPatientFullName(String lastName, String firstName, String patronymic);
-    List<MedicalCard> getByPatientLastName(String lastName);
 }

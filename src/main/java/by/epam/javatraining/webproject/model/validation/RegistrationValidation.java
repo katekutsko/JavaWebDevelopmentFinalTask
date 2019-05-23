@@ -13,10 +13,9 @@ public class RegistrationValidation {
         logger = Logger.getRootLogger();
     }
 
-
-    public static final String NAME_PATTERN = "[А-ЯA-Z][А-Яа-яA-Za-z]{1,20}";
-    public static final String LOGIN_PATTERN = "^(?=.+\\@\\w{4,6}\\.\\w{2,3}).{10,20}$";
-    public static final String PASSWORD_PATTERN = "^(?=.*[0-9].*[0-9]).*.{6,10}$";
+    private static final String NAME_PATTERN = "[А-ЯA-Z][А-Яа-яA-Za-z]{1,20}";
+    private static final String LOGIN_PATTERN = "^(?=.+\\@\\w{4,6}\\.\\w{2,3}).{10,20}$";
+    private static final String PASSWORD_PATTERN = "^(?=.*[0-9].*[0-9]).*.{6,10}$";
 
     public static boolean validateNameComponent(String string){
         return string.matches(NAME_PATTERN);

@@ -29,7 +29,7 @@ public class LoginCommand implements Command {
     @Override
     public String execute(HttpServletRequest request, ActionType type) {
 
-        String page = Pages.REDIRECT_ERROR_PAGE;
+        String page = Pages.REDIRECT_LOGIN;
         HttpSession session = request.getSession();
 
         if (type == ActionType.POST) {
@@ -60,23 +60,31 @@ public class LoginCommand implements Command {
                                 session.setAttribute(Parameters.CARD, card);
                             }
                             page = Pages.REDIRECT_VIEW_PROFILE;
+                            session.removeAttribute(Parameters.ERROR);
+                            session.removeAttribute(Parameters.PASSWORD_ERROR);
+                            session.removeAttribute(Parameters.LOGIN_ERROR);
                         } else {
                             logger.info("wrong password");
                             session.removeAttribute(Parameters.ERROR);
-                            session.setAttribute(Parameters.ERROR, Messages.WRONG_PASSWORD);
+                            session.removeAttribute(Parameters.LOGIN_ERROR);
+                            session.setAttribute(Parameters.PASSWORD_ERROR, Messages.WRONG_PASSWORD);
                         }
                     } else {
                         logger.info("wrong login");
                         session.removeAttribute(Parameters.ERROR);
-                        session.setAttribute(Parameters.ERROR, Messages.WRONG_LOGIN);
+                        session.removeAttribute(Parameters.PASSWORD_ERROR);
+                        session.setAttribute(Parameters.LOGIN_ERROR, Messages.WRONG_LOGIN);
                     }
                 } catch (UserServiceException | MedicalCardServiceException e) {
                     logger.error(e.getMessage());
+                    page = Pages.REDIRECT_ERROR_PAGE;
                     session.setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
                 } finally {
                     userService.releaseConnection();
                 }
             } else {
+                session.removeAttribute(Parameters.PASSWORD_ERROR);
+                session.removeAttribute(Parameters.LOGIN_ERROR);
                 session.setAttribute(Parameters.ERROR, Messages.FIELDS_NOT_FILLED);
             }
         } else {

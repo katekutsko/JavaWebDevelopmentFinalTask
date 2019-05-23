@@ -28,7 +28,7 @@ public class EditCaseCommand implements Command {
     @Override
     public String execute(HttpServletRequest request, ActionType type) {
 
-        String page = Pages.ERROR_PAGE;
+        String page;
         if (type == ActionType.GET) {
             page = preparePage(request);
         } else {
@@ -41,8 +41,7 @@ public class EditCaseCommand implements Command {
         String page = Pages.ERROR_PAGE;
         String caseId = request.getParameter(Parameters.CASE_ID);
         String patientName = request.getParameter(Parameters.NAME);
-        logger.info("preparing edit case page");
-        logger.info("parameters (case id and name): " + caseId + " " + patientName);
+        logger.info("preparing edit case page. parameters (case id and name): " + caseId + " " + patientName);
 
         if (caseId != null && !caseId.equals("") && patientName != null && !patientName.equals("")) {
             int caseID = Integer.parseInt(caseId);
@@ -50,52 +49,36 @@ public class EditCaseCommand implements Command {
             caseService.takeConnection();
 
             if (caseID != 0) {
+                Case currentCase = null;
                 try {
-                    Case currentCase = null;
-                    try {
-                        currentCase = (Case) caseService.getById(caseID);
-                    } catch (ServiceException e) {
-                        logger.error(e.getMessage());
-                        request.getSession().setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
-                    }
-                    if (currentCase != null) {
-                        String admissionDate = currentCase.getAdmissionDate();
-                        Diagnosis diagnosis = currentCase.getFinalDiagnosis();
-                        String dischargeDate = currentCase.getDischargeDate();
-                        int cardId = currentCase.getMedicalCardId();
-                        String complaints = currentCase.getComplaints();
-                        logger.info("GOT: " + cardId + admissionDate + dischargeDate + complaints + diagnosis);
+                    currentCase = (Case) caseService.getById(caseID);
 
-                        request.setAttribute(Parameters.PATIENT_NAME, patientName);
-                        request.setAttribute(Parameters.CARD_ID, cardId);
-                        SimpleDateFormat sdf = new SimpleDateFormat(Parameters.DATE_PATTERN);
-                        request.setAttribute(Parameters.ADMISSION_DATE, sdf.format(sdf.parse(admissionDate)));
-                        if (dischargeDate != null && !dischargeDate.isEmpty()) {
-                            request.setAttribute(Parameters.DISCHARGE_DATE, sdf.format(sdf.parse(dischargeDate)));
-                        }
-                        request.setAttribute(Parameters.DIAGNOSIS, diagnosis);
-                        request.setAttribute(Parameters.CASE_ID, caseID);
-                        request.setAttribute(Parameters.COMPLAINTS, complaints);
-                        request.setAttribute(Parameters.DIAGNOSES, Diagnosis.values());
-                        page = Pages.EDIT_CASE;
-                    } else {
-                        request.getSession().setAttribute(Parameters.ERROR, Messages.ACTION_NOT_PERFORMED);
-                    }
-                } catch (ParseException e) {
+                } catch (ServiceException e) {
                     logger.error(e.getMessage());
                     request.getSession().setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
-                } finally {
-                    caseService.releaseConnection();
+                }
+                if (currentCase != null) {
+                    logger.info("GOT: " + currentCase);
+
+                    request.setAttribute(Parameters.PATIENT_NAME, patientName);
+                    request.setAttribute(Parameters.CASE, currentCase);
+                    page = Pages.EDIT_CASE;
+
+                } else {
+                    request.getSession().setAttribute(Parameters.ERROR, Messages.ACTION_NOT_PERFORMED);
                 }
             }
+            caseService.releaseConnection();
+        } else {
+            request.getSession().setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
         }
         return page;
     }
 
     private String processData(HttpServletRequest request) {
-        String page = Pages.ERROR_PAGE;
+        String page = Pages.REDIRECT_ERROR_PAGE;
 
-        String cardIdAsString = request.getParameter(Parameters.CASE_ID);
+        String cardIdAsString = request.getParameter(Parameters.CARD_ID);
         String admissionDateAsString = request.getParameter(Parameters.ADMISSION_DATE);
         String dischargeDateAsString = request.getParameter(Parameters.DISCHARGE_DATE);
         String caseIdAsString = request.getParameter(Parameters.CASE_ID);
@@ -106,7 +89,7 @@ public class EditCaseCommand implements Command {
         if (caseIdAsString != null && !caseIdAsString.isEmpty()) {
 
             CaseService caseService = (CaseService) ServiceFactory.getService(ServiceType.CASE_SERVICE);
-            caseService.getConnection();
+            caseService.takeConnection();
 
             logger.info("case id was " + caseIdAsString);
             int caseId = Integer.parseInt(caseIdAsString);
@@ -114,19 +97,24 @@ public class EditCaseCommand implements Command {
                 Case foundCase = (Case) caseService.getById(caseId);
 
                 if (foundCase != null) {
-                    foundCase.setFinalDiagnosis(Diagnosis.valueOf(diagnosisAsString.toUpperCase()));
-                    foundCase.setAdmissionDate(admissionDateAsString);
-                    foundCase.setDischargeDate(dischargeDateAsString);
-                    foundCase.setComplaints(complaints);
+                    if (diagnosisAsString != null && dischargeDateAsString != null) {
+                        foundCase.setFinalDiagnosis(Diagnosis.valueOf(diagnosisAsString.toUpperCase()));
+                        foundCase.setDischargeDate(dischargeDateAsString);
+                    }
+                    if (admissionDateAsString != null && complaints != null) {
+                        foundCase.setAdmissionDate(admissionDateAsString);
+                        foundCase.setComplaints(complaints);
 
-                    if (caseService.edit(foundCase)) {
-                        int cardID = Integer.parseInt(cardIdAsString);
-                        page = Pages.REDIRECT_VIEW_PATIENT + "&card_id=" + cardID;
+                        if (caseService.edit(foundCase)) {
+                            int cardID = Integer.parseInt(cardIdAsString);
+                            page = Pages.REDIRECT_VIEW_PATIENT + "&" + Parameters.CARD_ID + "=" + cardID;
+                        }
                     }
                 }
-            } catch (ServiceException e){
+            } catch (ServiceException e) {
                 logger.error(e.getMessage());
             }
+            request.getSession().setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
             caseService.releaseConnection();
         }
         return page;

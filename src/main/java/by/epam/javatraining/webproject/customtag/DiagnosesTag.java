@@ -6,19 +6,24 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.SimpleTagSupport;
 import java.io.IOException;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class DiagnosesTag extends SimpleTagSupport {
 
-    private String[] diagnoses;
+    private int ordinal;
+    private Diagnosis[] diagnoses;
 
     {
-        Diagnosis[] values = Diagnosis.values();
-        diagnoses = new String[values.length];
-        int i = 0;
-        for (Diagnosis diagnosis : values){
-            diagnoses[i] = diagnosis.name();
-            i++;
-        }
+       diagnoses = Diagnosis.values();
+    }
+
+    public int getOrdinal() {
+        return ordinal;
+    }
+
+    public void setOrdinal(int ordinal) {
+        this.ordinal = ordinal;
     }
 
     @Override
@@ -27,10 +32,13 @@ public class DiagnosesTag extends SimpleTagSupport {
         JspWriter out = getJspContext().getOut();
         out.println("<select name=\"final_diagnosis\">");
 
-        for (String diagnosis : diagnoses) {
-            out.println("<option>" + diagnosis + "</option>");
+        String selected;
+        for (Diagnosis diagnosis : diagnoses) {
+            selected = "";
+            if (ordinal == diagnosis.ordinal()) {
+                selected = "selected=\"selected\"";
+            }
+            out.println("<option " + selected + ">" + diagnosis + "</option>");
         }
-
-        out.println("</select>");
     }
 }

@@ -123,6 +123,7 @@ public class DeleteUserCommand implements Command {
             }
             if (cardService.delete(card)) {
                 logger.debug("deleting card");
+            } else {
                 next = false;
             }
         } catch (ServiceException e) {

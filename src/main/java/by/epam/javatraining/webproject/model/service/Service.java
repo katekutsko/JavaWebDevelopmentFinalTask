@@ -79,8 +79,8 @@ public class Service {
     public boolean edit(Entity entity) throws ServiceException {
         boolean result = false;
         try {
-            dao.update(entity);
-            result= true;
+
+            result= dao.update(entity);
         } catch (DAOException e) {
             logger.error(e.getMessage());
             throw new ServiceException(e.getMessage());
@@ -91,8 +91,7 @@ public class Service {
     public boolean add(Entity entity) throws ServiceException {
         boolean result = false;
         try {
-            dao.insert(entity);
-            result = true;
+            result = dao.insert(entity);
         } catch (DAOException e) {
             logger.error(e.getMessage());
             throw new ServiceException(e.getMessage());
@@ -103,8 +102,7 @@ public class Service {
     public boolean update(Entity entity) throws ServiceException {
         boolean result = false;
         try {
-            dao.update(entity);
-            result = true;
+            result = dao.update(entity);
         } catch (DAOException e) {
             logger.error(e.getMessage());
             throw new ServiceException(e.getMessage());
@@ -116,8 +114,7 @@ public class Service {
     public boolean delete(Entity entity) throws ServiceException {
         boolean result = false;
         try {
-            dao.delete(entity);
-            result = true;
+            result = dao.delete(entity);
         } catch (DAOException e) {
             logger.error(e.getMessage());
             throw new ServiceException(e.getMessage());

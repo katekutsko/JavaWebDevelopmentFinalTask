@@ -19,24 +19,20 @@ public class PrescriptionService extends Service {
     }
 
     public List<Prescription> getAllByCaseId(int id) throws PrescriptionServiceException {
-        List<Prescription> prescriptionList = null;
-        try {
-            prescriptionList = prescriptionDAO.getAllByCaseId(id);
+       try {
+            return prescriptionDAO.getAllByCaseId(id);
         } catch (PrescriptionDAOException e) {
             logger.error(e.getMessage());
             throw new PrescriptionServiceException(e.getMessage());
         }
-        return prescriptionList;
     }
 
     public List<Prescription> getByPatientId(int id) throws PrescriptionServiceException {
-        List<Prescription> prescriptionList = null;
         try {
-            prescriptionDAO.getByPatientId(id);
+            return prescriptionDAO.getByPatientId(id);
         } catch (PrescriptionDAOException e) {
             logger.error(e.getMessage());
             throw new PrescriptionServiceException(e.getMessage());
         }
-        return prescriptionList;
     }
 }

@@ -17,9 +17,6 @@ public class MedicalCardDAO extends AbstractDAO implements IMedicalCardDAO {
     public static final String FIND_ALL = "SELECT idmedical_card, iduser, sex, birth_date FROM medical_card";
     public static final String FIND_BY_PATIENT_ID = FIND_ALL + " WHERE iduser = ?";
     public static final String FIND_BY_ID = FIND_ALL + " WHERE idmedical_card = ?";
-    public static final String FIND_BY_PATIENT_FULL_NAME = FIND_ALL + " INNER JOIN user ON user.iduser = medical_card.iduser WHERE last_name = ?, " +
-            "first_name = ?, patronymic = ?";
-    public static final String FIND_BY_PATIENT_LAST_NAME = FIND_ALL + " INNER JOIN user ON user.iduser = medical_card.iduser WHERE last_name = ?";
     public static final String ADD_MEDICAL_CARD = "INSERT INTO medical_card(iduser, sex, birth_date) VALUES(?, ?, ?)";
     public static final String UPDATE_MEDICAL_CARD = "UPDATE medical_card SET sex = ?, birth_date = ? WHERE idmedical_card = ?";
     public static final String DELETE_MEDICAL_CARD = "DELETE FROM medical_card WHERE idmedical_card = ?";
@@ -57,44 +54,6 @@ public class MedicalCardDAO extends AbstractDAO implements IMedicalCardDAO {
 
         if (cards != null && !cards.isEmpty()) {
             return cards.get(0);
-        }
-        return null;
-    }
-
-    @Override
-    public MedicalCard getByPatientFullName(String lastName, String firstName, String patronymic) {
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_PATIENT_FULL_NAME);
-            preparedStatement.setString(1, lastName);
-            preparedStatement.setString(2, firstName);
-            preparedStatement.setString(3, patronymic);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            List<MedicalCard> cards = unmarshal(resultSet);
-            if (cards != null && !cards.isEmpty()) {
-                return  cards.get(0);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    @Override
-    public List<MedicalCard> getByPatientLastName(String lastName) {
-        if (lastName != null) {
-            try {
-                PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_PATIENT_LAST_NAME);
-                preparedStatement.setString(1, lastName);
-
-                ResultSet resultSet = preparedStatement.executeQuery();
-                List<MedicalCard> cards = unmarshal(resultSet);
-
-                return cards;
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
         return null;
     }
@@ -175,7 +134,7 @@ public class MedicalCardDAO extends AbstractDAO implements IMedicalCardDAO {
     }
 
     @Override
-    public boolean update(Entity entity) {
+    public boolean update(Entity entity) throws MedicalCardDAOException {
         if (entity instanceof MedicalCard) {
             MedicalCard card = (MedicalCard) entity;
 
@@ -187,12 +146,11 @@ public class MedicalCardDAO extends AbstractDAO implements IMedicalCardDAO {
                 preparedStatement.executeUpdate();
 
             } catch (SQLException e) {
-                e.printStackTrace();//TODO
+                logger.error(e.getMessage());
+                throw new MedicalCardDAOException(e.getMessage());
             }
             return true;
         }
         return false;
     }
-
-
 }

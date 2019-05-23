@@ -33,7 +33,7 @@ public class RegisterCommand implements Command {
     @Override
     public String execute(HttpServletRequest request, ActionType type) {
 
-        String page = Pages.REDIRECT_ERROR_PAGE;
+        String page = Pages.REDIRECT_REGISTRATION;
         HttpSession session = request.getSession();
 
         if (type == ActionType.POST) {
@@ -67,7 +67,6 @@ public class RegisterCommand implements Command {
                         }
 
                         User newUser = new User(userRole, login, password.hashCode(), name, surname, patronymic);
-
                         userService.addUser(newUser);
 
                         if (user == null) {
@@ -91,21 +90,22 @@ public class RegisterCommand implements Command {
 
                             } else {
                                 userService.rollback();
-                                session.setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
                             }
+                            userService.setAutoCommit(true);
                         } else {
-                            page = Pages.VIEW_USERS;
+                            page = Pages.REDIRECT_VIEW_USERS;
+                            session.removeAttribute(Parameters.ERRORS);
+                            session.removeAttribute(Parameters.ERROR);
                         }
-                        userService.releaseConnection();
-                    } else {
-                        session.setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
                     }
-                    userService.setAutoCommit(true);
+                    userService.releaseConnection();
                 } catch (UserServiceException | MedicalCardServiceException e) {
+                    logger.error("could not get message: " + e.getMessage());
+                    page = Pages.REDIRECT_ERROR_PAGE;
                     session.setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
                 }
             } else {
-                session.setAttribute(Parameters.ERROR, errorMessages);
+                session.setAttribute(Parameters.ERRORS, errorMessages);
             }
         } else {
             session.setAttribute(Parameters.ROLES, UserRole.values());
@@ -115,7 +115,7 @@ public class RegisterCommand implements Command {
     }
 
     private List<String> formErrorMessage(String name, String surname, String patronymic, String password,
-                                    String repeatPassword, String login) {
+                                          String repeatPassword, String login) {
 
         boolean[] check = new boolean[VALIDATION_PARAMETERS_AMOUNT];
         check[0] = (RegistrationValidation.validateNameComponent(name)
@@ -134,8 +134,14 @@ public class RegisterCommand implements Command {
 
         for (int i = 0; i < VALIDATION_PARAMETERS_AMOUNT; i++) {
             if (!check[i]) {
+                logger.debug(i + " validation parameter was invalid");
                 errors.add(errorMessages[i]);
+            } else {
+                errors.add(null);
             }
+        }
+        if (errors != null) {
+            logger.debug(errors);
         }
         return errors;
     }

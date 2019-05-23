@@ -38,6 +38,7 @@ public abstract class AbstractDAO implements IDAO {
     public void setAutoCommit(boolean autocommit) throws CommitException {
         try {
             if (connection != null) {
+                logger.info("auocommit set to " + autocommit);
                 connection.setAutoCommit(autocommit);
             }
         } catch (SQLException e) {

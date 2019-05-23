@@ -38,7 +38,7 @@ public class DischargeCommand implements Command {
 
             if (diagnosisString != null && date != null && lastCaseId != null && !lastCaseId.equals("")) {
 
-                Diagnosis diagnosis = Diagnosis.valueOf(diagnosisString);
+                Diagnosis diagnosis = Diagnosis.valueOf(diagnosisString.toUpperCase());
                 CaseService caseService = (CaseService) ServiceFactory.getService(ServiceType.CASE_SERVICE);
 
                 caseService.takeConnection();

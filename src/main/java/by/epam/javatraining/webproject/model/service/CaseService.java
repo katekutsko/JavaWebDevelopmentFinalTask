@@ -68,14 +68,12 @@ public class CaseService extends Service {
             int cardID = newCase.getMedicalCardId();
             try {
                 MedicalCardService cardService = (MedicalCardService) ServiceFactory.getService(ServiceType.MEDICAL_CARD_SERVICE);
-                cardService.getConnection();
+                cardService.setConnection(getConnection());
                 MedicalCard card = (MedicalCard) cardService.getById(cardID);
-                cardService.releaseConnection();
 
                 UserService userService = (UserService) ServiceFactory.getService(ServiceType.USER_SERVICE);
-                userService.getConnection();
+                userService.setConnection(getConnection());
                 User user = (User) userService.getById(doctorID);
-                userService.releaseConnection();
 
                 if (user != null && card != null) {
                     result = super.add(entity);
@@ -86,5 +84,10 @@ public class CaseService extends Service {
             }
         }
         return result;
+    }
+
+    public boolean deleteCase(Case deletedCase){
+        CaseDAO caseDAO = (CaseDAO) DAOFactory.getDAO(DAOType.CASE_DAO);
+        return caseDAO.delete(deletedCase);
     }
 }
