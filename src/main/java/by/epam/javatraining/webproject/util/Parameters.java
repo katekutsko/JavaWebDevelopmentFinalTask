@@ -50,4 +50,7 @@ public class Parameters {
     public static final String DOCTOR_NAMES = "doctor_names";
     public static final String CASE_ID = "case_id";
     public static final String DIAGNOSIS = "diagnosis";
+    public static final String ACTIVE = "active";
+    public static final String CASE = "current_case";
+    public static final String ERRORS = "errors";
 }
