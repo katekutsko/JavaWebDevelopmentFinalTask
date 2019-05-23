@@ -14,6 +14,12 @@
         <name>diagnoses</name>
         <tag-class>by.epam.javatraining.webproject.customtag.DiagnosesTag</tag-class>
         <body-content>empty</body-content>
+        <attribute>
+            <description>Ordinal of previously selected diagnosis</description>
+            <name>ordinal</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
     </tag>
 
     <tag>
@@ -25,6 +31,19 @@
             <description>Number of starting element</description>
             <name>from</name>
             <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <description>Name of a user</description>
+            <name>name</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <description>ID of a card</description>
+            <name>cardId</name>
+            <required>false</required>
             <rtexprvalue>true</rtexprvalue>
         </attribute>
         <attribute>
