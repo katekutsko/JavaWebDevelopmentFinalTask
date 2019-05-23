@@ -63,7 +63,7 @@ public class AddCaseCommand implements Command {
                 logger.info(newCase + " created");
 
                 CaseService caseService = (CaseService) ServiceFactory.getService(ServiceType.CASE_SERVICE);
-                caseService.getConnection();
+                caseService.takeConnection();
 
                 try {
                     if (caseService.add(newCase)) {
@@ -71,7 +71,6 @@ public class AddCaseCommand implements Command {
                         request.removeAttribute(Parameters.PATIENT_NAME);
                         request.removeAttribute(Parameters.CARD_ID);
                         request.removeAttribute(Parameters.ADMISSION_DATE);
-                        caseService.releaseConnection();
                         page = Pages.REDIRECT_VIEW_PATIENT + "&card_id=" + cardId;
                     } else {
                         logger.error("could not add case");
@@ -79,10 +78,13 @@ public class AddCaseCommand implements Command {
                     }
                 } catch (CaseServiceException e) {
                     logger.error(e.getMessage());
+                } finally {
+                    caseService.releaseConnection();
                 }
+            } else {
+                logger.error("case was not recorded");
+                request.setAttribute(Parameters.ERROR, Messages.FIELDS_NOT_FILLED);
             }
-            logger.error("case was not recorded");
-            request.setAttribute(Parameters.ERROR, Messages.FIELDS_NOT_FILLED);
         }
         return page;
     }
