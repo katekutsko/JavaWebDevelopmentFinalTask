@@ -1,5 +1,4 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@include file='head.jspf' %>
 
 <div id="sidebar_container">
         <div class="sidebar">
@@ -18,11 +17,10 @@
           <div class="sidebar_item">
             <h3><fmt:message key="search"/> </h3>
             <form method="get" action="Hospital">
-              <p>
-                <input class="search" type="text" name="name" placeholder="Enter name..." autocomplete="off"/>
+                <input class="search" type="text" name="name" autocomplete="off"/>
                 <input type="hidden" value="search" name="command"/>
                 <button type="submit" style="background: #FFF"><img src="style/search.png" alt="Search"/></button>
-              </p>
+
             </form>
           </div>
           <div class="sidebar_base"></div>

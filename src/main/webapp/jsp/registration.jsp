@@ -12,6 +12,7 @@
         <div id="banner"></div>
 
         <%@include file='jspf/side_content.jspf' %>
+
         <div id="content">
             <div id="centerbar_container">
                 <div class="centerbar_top"></div>
@@ -22,12 +23,16 @@
                             <div align="center">
                                 <input type="hidden" name="command" value="register"/>
                                 <fmt:message key="surname"/><p><input type="text" name="surname" maxlength="20"
-                                                                       autocomplete="off"/></p>
+                                                                      autocomplete="off"/></p>
                                 <fmt:message key="name"/> <p><input type="text" name="name" maxlength="20"
                                                                     autocomplete="off"/></p>
 
                                 <fmt:message key="patronymic"/><p><input type="text" name="patronymic"
                                                                          autocomplete="off" maxlength="20"/></p>
+
+                                <c:if test="${not empty errors[0]}">
+                                    <p style="color: #F00; padding-right: 75px;"><fmt:message key="${errors[0]}"/></p>
+                                </c:if>
                                 <c:if test="${empty user}">
                                     <fmt:message key="sex"/>
                                     <p>
@@ -49,12 +54,23 @@
                                     </select>
                                     </p>
                                 </c:if>
+
                                 <fmt:message key="email"/>:
                                 <p><input type="text" name="login" maxlength="20" autocomplete="off"/></p>
+                                <c:if test="${not empty errors[3]}">
+                                    <p style="color: #F00; padding-right: 75px;"><fmt:message key="${errors[3]}"/></p>
+                                </c:if>
                                 <fmt:message key="password"/>:
                                 <p><input type="password" name="password" maxlength="10"/></p>
+
+                                <c:if test="${not empty errors[1]}">
+                                    <p style="color: #F00; padding-right: 75px;"><fmt:message key="${errors[1]}"/></p>
+                                </c:if>
                                 <fmt:message key="repeat_password"/>:
                                 <p><input type="password" name="repeat_password" maxlength="10"/></p>
+                                <c:if test="${not empty errors[2]}">
+                                    <p style="color: #F00; padding-right: 75px;"><fmt:message key="${errors[2]}"/></p>
+                                </c:if>
                                 <p>
                                     <button type="submit"><fmt:message key="registration"/></button>
                             </div>

@@ -18,46 +18,70 @@
                 <div class="centerbar_top"></div>
                 <div class="centerbar">
                     <div class="centerbar_item">
-                        <h2 align="center"><fmt:message key="edit"/></h2>
+                        <h2 align="center"><fmt:message key="editing_case"/></h2>
+
                         <form method="POST" action="Hospital">
                             <input type="hidden" name="command" value="edit_case"/>
-                            <input type="hidden" name="case_id" value="${case_id}"/>
-                            <label for="1"><fmt:message key="patient"/>
-                                <input type="text" id="1" name="name" value="${patient_name}" readonly="readonly"
-                                       style="width: 250px"/>
-                            </label></br>
-                            <label for="2"><fmt:message key="card_id"/>
-                                <input id="2" type="text" name="card_id" value="${card_id}" readonly="readonly"
-                                       style="width: 50px"/></br>
-                            </label></br>
-                            <label for="3"><fmt:message key="doctor"/>
-                                <input id="3" type="text" name="doctor_id" value="${user.id}" readonly="readonly"
-                                       style="width: 50px"/></label>
-                            ${user.name} ${user.surname} ${user.patronymic} </br> </br>
-                            <label for="5"><fmt:message key="admission_date"/>
-                                <input id="5" type="date" name="admission_date" value="${admission_date}"
-                                       style="width: 150px"/>
-                            </label> </br> </br>
+                            <input type="hidden" name="case_id" value="${current_case.id}"/>
 
-                            <label for="6"><fmt:message key="discharge_date"/>
-                                <input id="6" type="date" name="discharge_date" value="${dischargement_date}"
-                                       style="width: 150px"/></label></br></br>
-                            <label for="4"><fmt:message key="complaints"/>
-                                <input id="4" type="text" name="complaints" value="${complaints}" style="width: 350px" maxlength="100"/>
-                            </label></br>
-                            <label><fmt:message key="diagnosis"/>
-                                <ctg:diagnoses/>
-                            </label>
-
-                            <input type="submit" value="Submit" style="margin-left: 100px"/>
-                            </td>
+                            <table>
+                                <tr>
+                                    <td>
+                                        <fmt:message key="patient"/></td>
+                                    <td>
+                                        <input type="text" id="1" name="name" value="${patient_name}"
+                                               readonly="readonly"
+                                               style="width: 250px"/></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <fmt:message key="card_id"/></td>
+                                    <td>
+                                        <input id="2" type="text" name="card_id" value="${current_case.medicalCardId}"
+                                               readonly="readonly"
+                                               style="width: 50px"/></td>
+                                </tr>
+                                <tr>
+                                    <td><fmt:message key="doctor"/></td>
+                                    <td> ${user.name} ${user.surname} ${user.patronymic}
+                                        <input id="3" type="hidden" name="doctor_id" value="${current_case.doctorId}">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <fmt:message key="admission_date"/></td>
+                                    <td><input id="5" type="date" name="admission_date"
+                                                value="${current_case.admissionDate}"
+                                                style="width: 150px"/></td>
+                                </tr>
+                                <tr>
+                                    <td><fmt:message key="complaints"/></td>
+                                    <td><input id="4" type="text" name="complaints" value="${current_case.complaints}"
+                                               style="width: 350px"
+                                               maxlength="100"/></td>
+                                </tr>
+                                <c:if test="${current_case.active == 0}">
+                                    <tr>
+                                        <td><fmt:message key="discharge_date"/></td>
+                                        <td><input id="6" type="date" name="discharge_date"
+                                                   value="${current_case.dischargeDate}"
+                                                   style="width: 150px"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><fmt:message key="diagnosis"/></td>
+                                        <td><ctg:diagnoses ordinal="${current_case.finalDiagnosis.ordinal}"/></td>
+                                    </tr>
+                                </c:if>
                             </table>
 
+                            <button type="submit" name="command" value="edit_case">
+                                <fmt:message
+                                        key="save"/></button>
                         </form>
 
                     </div>
                 </div>
-                <div class="centerbar_base" style="margin-top: 50px;"></div>
+                <div class="centerbar_base"></div>
             </div>
         </div>
     </div>

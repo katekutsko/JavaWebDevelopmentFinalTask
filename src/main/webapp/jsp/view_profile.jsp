@@ -18,13 +18,13 @@
                 <div class="centerbar_top"></div>
                 <div class="centerbar">
                     <div class="centerbar_item">
-                        <h2 align="center"><fmt:message key="profile"/> </h2>
+                        <h2 align="center"><fmt:message key="profile"/></h2>
                         <form method="GET" action="Hospital">
                             <input type="hidden" name="command" value="edit_profile"/>
                             <table>
                                 <tr>
                                     <td>
-                                       <fmt:message key="id"/>
+                                        <fmt:message key="id"/>
                                     </td>
                                     <td>
                                         ${user.id}
@@ -59,7 +59,7 @@
                                         <fmt:message key="role"/>
                                     </td>
                                     <td>
-                                       <fmt:message key="${user.role}"/>
+                                        <fmt:message key="${user.role}"/>
                                     </td>
                                 </tr>
                                 <tr>
@@ -103,7 +103,7 @@
                                 </c:if>
                             </table>
                             <div align="center">
-                                <button type="submit"> <fmt:message key="edit_profile"/> </button>
+                                <button type="submit"><fmt:message key="edit_profile"/></button>
                             </div>
                         </form>
                     </div>

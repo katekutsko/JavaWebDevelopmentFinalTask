@@ -8,6 +8,7 @@
 <html>
 <style>
     <%@include file='../../style/style.css' %>
+
 </style>
 
 <c:if test="${not empty param.language}">
@@ -19,6 +20,7 @@
 <fmt:setLocale value="${language}" />
 <head>
   <title><fmt:message key="title"/></title>
+    <link rel="shortcut icon" href="/style/favicon.ico" type="image/x-icon"/>
 </head>
 
 

@@ -58,7 +58,10 @@
                                     <td>${user.name} ${user.surname} ${user.patronymic} </td>
                                 </tr>
                             </table>
-                            <button type="submit"><fmt:message key="dischargement"/></button>
+
+                            <div align="center">
+                                <button type="submit"><fmt:message key="dischargement"/></button>
+                            </div>
 
                         </form>
 
