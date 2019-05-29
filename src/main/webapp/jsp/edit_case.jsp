@@ -29,7 +29,7 @@
                                     <td>
                                         <fmt:message key="patient"/></td>
                                     <td>
-                                        <input type="text" id="1" name="name" value="${patient_name}"
+                                        <input type="text" name="name" value="${patient_name}"
                                                readonly="readonly"
                                                style="width: 250px"/></td>
                                 </tr>
@@ -37,39 +37,41 @@
                                     <td>
                                         <fmt:message key="card_id"/></td>
                                     <td>
-                                        <input id="2" type="text" name="card_id" value="${current_case.medicalCardId}"
+                                        <input type="text" name="card_id" value="${current_case.medicalCardId}"
                                                readonly="readonly"
                                                style="width: 50px"/></td>
                                 </tr>
                                 <tr>
                                     <td><fmt:message key="doctor"/></td>
                                     <td> ${user.name} ${user.surname} ${user.patronymic}
-                                        <input id="3" type="hidden" name="doctor_id" value="${current_case.doctorId}">
+                                        <input type="hidden" name="doctor_id" value="${current_case.doctorId}">
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>
                                         <fmt:message key="admission_date"/></td>
-                                    <td><input id="5" type="date" name="admission_date"
+                                    <td><input type="date" name="admission_date"
                                                 value="${current_case.admissionDate}"
                                                 style="width: 150px"/></td>
                                 </tr>
                                 <tr>
                                     <td><fmt:message key="complaints"/></td>
-                                    <td><input id="4" type="text" name="complaints" value="${current_case.complaints}"
+                                    <td><input type="text" name="complaints" value="${current_case.complaints}"
                                                style="width: 350px"
                                                maxlength="100"/></td>
                                 </tr>
                                 <c:if test="${current_case.active == 0}">
                                     <tr>
                                         <td><fmt:message key="discharge_date"/></td>
-                                        <td><input id="6" type="date" name="discharge_date"
+                                        <td><input type="date" name="discharge_date"
                                                    value="${current_case.dischargeDate}"
                                                    style="width: 150px"/></td>
                                     </tr>
                                     <tr>
                                         <td><fmt:message key="diagnosis"/></td>
-                                        <td><ctg:diagnoses ordinal="${current_case.finalDiagnosis.ordinal}"/></td>
+                                        <td><input type="text" name="diagnosis"
+                                                  value="${current_case.finalDiagnosis}"
+                                                  style="width: 150px"/></td>
                                     </tr>
                                 </c:if>
                             </table>

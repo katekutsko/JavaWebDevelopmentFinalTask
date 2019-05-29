@@ -1,4 +1,4 @@
-package by.epam.javatraining.webproject.model.entity;
+package by.epam.javatraining.webproject.model.entity.prescriptiontype;
 
 public enum PrescriptionType {
 

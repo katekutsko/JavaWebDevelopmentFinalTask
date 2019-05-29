@@ -1,4 +1,4 @@
-package by.epam.javatraining.webproject.model.exception;
+package by.epam.javatraining.webproject.model.dao.exception;
 
 public class DAOException extends Exception {
     public DAOException() {

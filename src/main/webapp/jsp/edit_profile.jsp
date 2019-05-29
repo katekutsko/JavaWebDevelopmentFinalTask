@@ -30,6 +30,7 @@
                                         <input type="text" name="id" value="${user.id}" readonly="readonly"
                                                style="width: 50px"/>
                                     </td>
+                                    <td></td>
                                 </tr>
                                 <tr>
                                     <td>
@@ -38,6 +39,7 @@
                                     <td>
                                         <input type="text" name="surname" value="${user.surname}" style="width: 200px"/>
                                     </td>
+                                    <td></td>
                                 </tr>
                                 <tr>
                                     <td>
@@ -46,6 +48,7 @@
                                     <td>
                                         <input type="text" name="name" value="${user.name}" style="width: 200px"/>
                                     </td>
+                                    <td></td>
                                 </tr>
                                 <tr>
                                     <td>
@@ -55,6 +58,27 @@
                                         <input type="text" name="patronymic" value="${user.patronymic}"
                                                style="width: 200px"/>
                                     </td>
+                                    <td>
+                                        <c:if test="${not empty errors[0]}">
+                                            <p style="color: #F00; padding-right: 75px;"><fmt:message
+                                                    key="${errors[0]}"/></p>
+                                        </c:if>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <fmt:message key="phone_number"/>
+                                    </td>
+                                    <td>
+                                        <input type="text" name="phone_number" value="${user.phoneNumber}"
+                                               style="width: 200px"/>
+                                    </td>
+                                    <td>
+                                        <c:if test="${not empty errors[4]}">
+                                            <p style="color: #F00; padding-right: 75px;"><fmt:message
+                                                    key="${errors[4]}"/></p>
+                                        </c:if>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>
@@ -62,6 +86,15 @@
                                     </td>
                                     <td>
                                         <input type="text" name="login" value="${user.login}" style="width: 200px"/>
+                                    </td>
+                                    <td><c:if test="${not empty errors[3]}">
+                                        <p style="color: #F00; padding-right: 75px;"><fmt:message
+                                                key="${errors[3]}"/></p>
+                                    </c:if>
+                                        <c:if test="${not empty errors[6]}">
+                                            <p style="color: #F00; padding-right: 75px;"><fmt:message
+                                                    key="${errors[6]}"/></p>
+                                        </c:if>
                                     </td>
                                 </tr>
                                 <tr>
@@ -71,6 +104,12 @@
                                     <td>
                                         <input type="password" name="old_password" style="width: 200px"/>
                                     </td>
+                                    <td>
+                                        <c:if test="${not empty errors[5]}">
+                                            <p style="color: #F00; padding-right: 75px;"><fmt:message
+                                                    key="${errors[5]}"/></p>
+                                        </c:if>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>
@@ -79,6 +118,12 @@
                                     <td>
                                         <input type="password" name="new_password" style="width: 200px"/>
                                     </td>
+                                    <td>
+                                        <c:if test="${not empty errors[1]}">
+                                            <p style="color: #F00; padding-right: 75px;"><fmt:message
+                                                    key="${errors[1]}"/></p>
+                                        </c:if>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>
@@ -86,6 +131,12 @@
                                     </td>
                                     <td>
                                         <input type="password" name="repeat_new_password" style="width: 200px"/>
+                                    </td>
+                                    <td>
+                                        <c:if test="${not empty errors[2]}">
+                                            <p style="color: #F00; padding-right: 75px;"><fmt:message
+                                                    key="${errors[2]}"/></p>
+                                        </c:if>
                                     </td>
                                 </tr>
 
@@ -98,6 +149,7 @@
                                             <input type="date" name="birth_date" value="${medical_card.dateOfBirth}"
                                                    style="width: 200px"/>
                                         </td>
+                                        <td></td>
                                     </tr>
                                     <tr>
                                         <td>
@@ -111,10 +163,13 @@
                                                 <fmt:message key="male"/></label>
                                             </c:if>
                                             <c:if test="${medical_card.sex == 1}">
-                                                <input type="radio" name="sex" value="0"/> <fmt:message key="female"/> </br> </br>
-                                                <input type="radio" name="sex" value="1" checked="checked"/><fmt:message key="male"/>
+                                                <input type="radio" name="sex" value="0"/> <fmt:message
+                                                    key="female"/> </br> </br>
+                                                <input type="radio" name="sex" value="1" checked="checked"/><fmt:message
+                                                    key="male"/>
                                             </c:if>
                                         </td>
+                                        <td></td>
                                     </tr>
                                     <tr>
                                         <td>
@@ -123,6 +178,7 @@
                                                        readonly="readonly" style="width: 50px"/>
                                             </label>
                                         </td>
+                                        <td></td>
                                     </tr>
                                 </c:if>
                                 <tr>

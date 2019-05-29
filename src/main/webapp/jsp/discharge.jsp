@@ -48,7 +48,7 @@
                                 </tr>
                                 <tr>
                                     <td><fmt:message key="diagnosis"/></td>
-                                    <td><ctg:diagnoses/></td>
+                                    <td><input type="text" name="diagnosis" style="width: 150px"/></td>
                                 </tr>
 
                                 <input type="hidden" name="doctor_id" value="${user.id}" readonly="readonly"/></br>

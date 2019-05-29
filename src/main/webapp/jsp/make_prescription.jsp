@@ -25,7 +25,7 @@
                                 <tr>
                                     <td>
                                         <input type="hidden" name="command" value="make_prescription"/>
-                                        <input type="hidden" name="last_case_id" value="${param.discharge_case_id}"/>
+                                        <input type="hidden" name="last_case_id" value="${param.last_case_id}"/>
 
                                         <fmt:message key="type"/>
                                     </td>

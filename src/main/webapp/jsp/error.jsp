@@ -18,9 +18,17 @@
                 <div class="centerbar_top"></div>
                 <div class="centerbar">
                     <div class="centerbar_item">
-                        <c:forEach items="${error}" var="item">
-                            <p style="color: #F00; padding-right: 70px;"><fmt:message key="${item}"/></p>
+                        <p style="text-align: center; color: red">
+                            <c:forEach items="${error}" var="item">
+                        <p style="color: #F00; padding-right: 70px;"><fmt:message key="${item}"/></p>
                         </c:forEach>
+                        <c:if test="${ not empty param.error}">
+                            <fmt:message key="${param.error}"/>
+                        </c:if>
+                        <c:if test="${empty param.error && empty error}">
+                            <fmt:message key="something_went_wrong"/>
+                        </c:if>
+                        </p>
                     </div>
                 </div>
                 <div class="centerbar_base"></div>

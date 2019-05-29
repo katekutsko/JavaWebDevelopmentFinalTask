@@ -14,6 +14,13 @@
 
         <%@include file='jspf/side_content.jspf' %>
 
+        <div id="darkening">
+            <div id="window">
+                <p><fmt:message key="${blocked}"/></p>
+                <a href="#" class="close">OK</a>
+            </div>
+        </div>
+
         <div id="content">
             <form action="Hospital" method="POST">
                 <input type="hidden" name="command" value="login"/>

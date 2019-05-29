@@ -7,13 +7,7 @@
     <%@include file='jspf/header.jspf' %>
 
     <script language="JavaScript">
-        function hide(id) {
-            var table = document.getElementById(id);
-            var hidden = "hidden";
-            if (table.getAttribute(hidden) == null)
-                table.setAttribute(hidden, "hidden");
-            else table.removeAttribute(hidden);
-        }
+        <%@include file='../js/hideElement.js' %>
     </script>
 
     <div id="content_header"></div>
@@ -31,7 +25,13 @@
 
         <div id="content">
             <div id="centerbar_container">
-                <h3 align="center"><a href="Hospital?command=select_patient&"><c:out value="${patient_name}"/></a></h3>
+                <c:if test="${user.role != 'PATIENT'}">
+                    <h3 align="center"><a href="Hospital?command=select_patient&card_id=${card_id}"><c:out
+                            value="${patient_name}"/></a></h3>
+                </c:if>
+                <c:if test="${user.role == 'PATIENT'}">
+                    <h2 style="margin-left: 250px;"><fmt:message key="history"/></h2>
+                </c:if>
                 <c:choose>
                     <c:when test="${not empty cases}">
                         <c:forEach var="cur" items="${cases}" begin="${from}" end="${to}">
@@ -54,9 +54,9 @@
                                         </tr>
                                         <tr>
                                             <td><fmt:message key="diagnosis"/></td>
-                                            <td><c:if
-                                                    test="${not empty cur.finalDiagnosis}"> <fmt:message
-                                                    key="${cur.finalDiagnosis.key}"/> </c:if></td>
+                                            <td><c:if test="${not empty cur.finalDiagnosis}">
+                                                ${ cur.finalDiagnosis} </c:if>
+                                            </td>
                                         </tr>
                                         <tr>
                                             <td><fmt:message key="complaints"/></td>
@@ -69,11 +69,11 @@
                                         </tr>
                                     </table>
 
-                                    <c:if test="${user.id == cur.doctorId}">
-                                        <form method="POST" action="Hospital">
-                                            <input type="hidden" name="name" value="${patient_name}"/>
-                                            <input type="hidden" name="case_id" value="${cur.id}"/>
 
+                                    <form method="POST" action="Hospital">
+                                        <input type="hidden" name="name" value="${patient_name}"/>
+                                        <input type="hidden" name="case_id" value="${cur.id}"/>
+                                        <c:if test="${user.id == cur.doctorId}">
                                             <button type="submit" formmethod="get" name="command" value="edit_case">
                                                 <fmt:message key="edit"/></button>
 
@@ -81,8 +81,9 @@
                                                style="text-decoration: none; font: normal 100% 'trebuchet ms', sans-serif;"
                                                href="${requestScope['javax.servlet.forward.context_path']}${requestScope['javax.servlet.forward.servlet_path']}?${requestScope['javax.servlet.forward.query_string']}&case_id=${cur.id}#zatemnenie">
                                                 <fmt:message key="delete"/></a>
-                                            <div id="zatemnenie">
-                                                <div id="okno">
+
+                                            <div id="darkening">
+                                                <div id="window">
                                                     <p><fmt:message key="confirm_delete"/></p>
                                                     <a class="close"
                                                        href="${requestScope['javax.servlet.forward.context_path']}${requestScope['javax.servlet.forward.servlet_path']}?command=delete_case&case_id=${param.case_id}">
@@ -90,42 +91,31 @@
                                                     <a href="#" class="close"><fmt:message key="cancel"/></a>
                                                 </div>
                                             </div>
-                                            <button type="button" onclick="javascript:hide(${cur.id})">
-                                                <fmt:message
-                                                        key="view_prescriptions"/></button>
-                                        </form>
-                                    </c:if>
+
+                                        </c:if>
+                                        <button type="button" onclick="javascript:hide(${cur.id})">
+                                            <fmt:message
+                                                    key="view_prescriptions"/></button>
+                                    </form>
 
                                     <c:set var="prescriptions"
                                            value="${prescriptions_by_case_id[(cur.id).intValue()]}"/>
                                     <c:if test="${not empty prescriptions}">
-                                        <table style="margin-top: 20px; border: 1px solid black; border-collapse: collapse;"
-                                               width="350px" align="center" id="${cur.id}"
-                                               hidden="hidden">
-                                            <c:forEach var="pres"
-                                                       items="${prescriptions}">
+                                        <table style="margin-top: 20px" id="${cur.id}" hidden="hidden">
+                                            <tr>
+                                                <fmt:message key="view_prescriptions"/>
+                                            </tr>
+                                            <c:set var="i" value="0" scope="page"/>
+                                            <c:forEach var="pres" items="${prescriptions}">
                                                 <c:if test="${not empty pres}">
                                                     <tr>
-                                                        <td colspan="2"><h4 align="center"><fmt:message
-                                                                key="prescription"/></h4></td>
-                                                    </tr>
-
-                                                    <tr>
-                                                        <td width="40%"><fmt:message key="date"/></td>
-                                                        <td> ${pres.date} </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><fmt:message key="type"/></td>
-                                                        <td><fmt:message key="${pres.type}"/></td>
-                                                    </tr>
-                                                    <tr>
                                                         <td>
-                                                            <fmt:message key="details"/></td>
-                                                        <td> ${pres.details} </td>
+                                                           ${i = i+1}. <fmt:message key="date"/>: ${pres.date}, <fmt:message
+                                                                key="type"/>: <fmt:message key="${pres.type}"/> "${pres.details}"
+                                                        </td>
                                                     </tr>
                                                     <tr>
-                                                        <td><fmt:message key="doctor"/></td>
-                                                        <td> ${pres.doctorId} </td>
+                                                        <td><fmt:message key="doctor"/>: ${doctor_names[pres.doctorId]} </td>
                                                     </tr>
                                                 </c:if>
                                             </c:forEach>

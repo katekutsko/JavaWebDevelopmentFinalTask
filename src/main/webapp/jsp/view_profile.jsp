@@ -18,20 +18,12 @@
                 <div class="centerbar_top"></div>
                 <div class="centerbar">
                     <div class="centerbar_item">
-                        <h2 align="center"><fmt:message key="profile"/></h2>
+                        <h2 style="margin-left: 250px;"><fmt:message key="profile"/></h2>
                         <form method="GET" action="Hospital">
                             <input type="hidden" name="command" value="edit_profile"/>
                             <table>
                                 <tr>
-                                    <td>
-                                        <fmt:message key="id"/>
-                                    </td>
-                                    <td>
-                                        ${user.id}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
+                                    <td width="300px">
                                         <fmt:message key="surname"/>
                                     </td>
                                     <td>
@@ -64,15 +56,23 @@
                                 </tr>
                                 <tr>
                                     <td>
+                                        <fmt:message key="phone_number"/>
+                                    </td>
+                                    <td>
+                                        ${user.phoneNumber}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
                                         <fmt:message key="login"/>
                                     </td>
                                     <td>
                                         ${user.login}
                                     </td>
                                 </tr>
+                                <c:if test="${user.role == 'PATIENT'}">
                                 <tr>
                                     <td>
-                                        <c:if test="${user.role == 'PATIENT'}">
                                         <fmt:message key="birth_date"/>
                                     </td>
                                     <td>
@@ -102,7 +102,7 @@
                                 </tr>
                                 </c:if>
                             </table>
-                            <div align="center">
+                            <div style="margin-left: 230px;">
                                 <button type="submit"><fmt:message key="edit_profile"/></button>
                             </div>
                         </form>

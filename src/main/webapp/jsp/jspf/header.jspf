@@ -9,28 +9,12 @@
                     <td>
                         <h1><fmt:message key="title"/></h1></td>
                     <td align="right" valign="top">
-
                         <a id="rus"> <img class="lang" alt="Русский" src="style/rus.png"/></a>
                         <a id="eng"> <img class="lang" alt="English" src="style/eng.png" style="margin-top: -20px;"/></a>
                     </td>
                 </tr>
                 <script>
-                    function changeLocale(locale) {
-                        var ref = window.location.href;
-                        var pos = ref.search('&language=');
-                        if (pos !== -1) {
-                            window.location.replace(ref.substring(0, pos).concat('&language=').concat(locale));
-                        } else {
-                            window.location.replace(ref.concat('&language=').concat(locale));
-                        }
-                    }
-
-                    document.getElementById("rus").addEventListener('click', function () {
-                        changeLocale('ru');
-                    });
-                    document.getElementById("eng").addEventListener("click", function () {
-                        changeLocale('en');
-                    });
+                    <%@include file='../../js/changeLocale.js' %>
                 </script>
             </table>
             <h2><fmt:message key="motto"/></h2>
@@ -51,9 +35,11 @@
                         <li><a href="Hospital?command=view_doctors"><fmt:message key="view_doctors"/></a></li>
                         <li><a href="Hospital?command=view_prescriptions"><fmt:message key="view_prescriptions"/></a></li>
                         <li><a href="Hospital?command=view_history"><fmt:message key="view_history"/></a></li>
+                        <li><a href="Hospital?command=view_appointments"><fmt:message key="appointments"/></a></li>
                     </c:if>
                     <c:if test="${user.role == 'DOCTOR' || user.role == 'NURSE'}">
                         <li><a href="Hospital?command=view_all_patients"><fmt:message key="view_patients"/></a></li>
+                        <li><a href="Hospital?command=view_appointments"><fmt:message key="appointments"/></a></li>
                     </c:if>
                     <c:if test="${user.role == 'ADMINISTRATOR'}">
                         <li><a href="Hospital?command=view_all_users"><fmt:message key="view_users"/></a></li>

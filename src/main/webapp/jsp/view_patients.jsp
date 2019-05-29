@@ -61,7 +61,9 @@
                                     <td colspan="2" align="center">
                                         <form method="GET" action="Hospital">
                                             <input formmethod="GET" type="hidden" name="command" value="select_patient"/>
-                                            <button type="submit" name="card_id" value="${cards[j].id}"> <fmt:message key="select"/></button>
+                                           <div style="margin-left: 250px;">
+                                               <button type="submit" name="card_id" value="${cards[j].id}"> <fmt:message key="select"/></button>
+                                           </div>
                                         </form>
                                     </td>
                                 </tr>
