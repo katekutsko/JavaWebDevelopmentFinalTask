@@ -19,5 +19,7 @@ public class Messages {
     public static final String INVALID_LOGIN = "invalid_login";
     public static final String INVALID_PASSWORD = "invalid_password";
     public static final String INCONSISTENT_PASSWORDS = "inconsistent_passwords";
-
+    public static final String INVALID_PHONE_NUMBER = "invalid_phone_number";
+    public static final String BLOCKED_USER = "blocked";
+    public static final Object APPOINTMENT_NOT_MADE = "appointment_not_made";
 }

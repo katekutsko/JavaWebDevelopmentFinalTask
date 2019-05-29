@@ -4,7 +4,7 @@ public class Parameters {
 
     public static final String USER = "user";
     public static final String USER_ID = "user_id";
-    public static final String CARD = "card";
+    public static final String CARD = "medical_card";
     public static final String CARD_ID = "card_id";
     public static final String DOCTOR_ID = "doctor_id";
     public static final String LOGIN = "login";
@@ -48,9 +48,16 @@ public class Parameters {
     public static final String AMOUNT = "amount";
     public static final String DOCTORS = "doctors";
     public static final String DOCTOR_NAMES = "doctor_names";
+    public static final String NAMES = "names";
     public static final String CASE_ID = "case_id";
     public static final String DIAGNOSIS = "diagnosis";
     public static final String ACTIVE = "active";
     public static final String CASE = "current_case";
     public static final String ERRORS = "errors";
+    public static final String PHONE_NUMBER = "phone_number";
+    public static final String R_ERROR = "r_error";
+    public static final String WARNING = "#zatemnenie";
+    public static final String APPOINTMENTS = "appointments";
+    public static final String TODAY = "today";
+    public static final String APPOINTMENT_ID = "appointment_id";
 }

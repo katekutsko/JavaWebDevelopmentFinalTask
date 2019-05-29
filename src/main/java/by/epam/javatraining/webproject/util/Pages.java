@@ -36,4 +36,9 @@ public class Pages {
 
     public static final String EDIT_CASE = "/jsp/edit_case.jsp";
     public static final String VIEW_PRESCRIPTIONS = "/jsp/view_prescriprions.jsp";
+    public static final String REDIRECT_EDIT_PROFILE = "Hospital?command=edit_profile";
+
+    public static final String REDIRECT_MAKE_APPOINTMENT = "Hospital?command=make_appointment";
+    public static final String VIEW_APPOINTMENTS = "/jsp/view_appointments.jsp";
+    public static final String REDIRECT_VIEW_APPOINTMENTS = "Hospital?command=view_appointments";
 }
