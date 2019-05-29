@@ -24,14 +24,16 @@ public class EncodingFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response,
                          FilterChain chain) throws ServletException, IOException{
         String contentType = request.getContentType();
-        if (contentType != null && contentType.startsWith(FILTERABLE_CONTENT_TYPE))
+        if (contentType != null && contentType.startsWith(FILTERABLE_CONTENT_TYPE)) {
             request.setCharacterEncoding(encoding);
+        }
         chain.doFilter(request, response);
     }
 
     public void init(FilterConfig config) throws ServletException{
         encoding = config.getInitParameter(ENCODING_INIT_PARAM_NAME);
-        if (encoding == null)
+        if (encoding == null) {
             encoding = ENCODING_DEFAULT;
+        }
     }
 }
