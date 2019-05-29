@@ -10,19 +10,27 @@
     <uri>/WEB-INF/customtag</uri>
 
     <tag>
-        <description>Tag enables choice of a diagnosis from list.</description>
-        <name>diagnoses</name>
-        <tag-class>by.epam.javatraining.webproject.customtag.DiagnosesTag</tag-class>
-        <body-content>empty</body-content>
-        <attribute>
-            <description>Ordinal of previously selected diagnosis</description>
-            <name>ordinal</name>
-            <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
-        </attribute>
-    </tag>
+    <description>Tag enables choice of an option from list.</description>
+    <name>options</name>
+    <tag-class>by.epam.javatraining.webproject.customtag.SelectTag</tag-class>
+    <body-content>empty</body-content>
+    <attribute>
+        <description>Name of the select element</description>
+        <name>name</name>
+        <required>true</required>
+        <rtexprvalue>true</rtexprvalue>
+        <type>java.lang.String</type>
+    </attribute>
+    <attribute>
+        <description>Name of the select element</description>
+        <name>options</name>
+        <required>true</required>
+        <rtexprvalue>true</rtexprvalue>
+    </attribute>
+</tag>
 
-    <tag>
+
+<tag>
         <description>Tag enables transfer from one page of data to another.</description>
         <name>changePage</name>
         <tag-class>by.epam.javatraining.webproject.customtag.ChangePagesTag</tag-class>
