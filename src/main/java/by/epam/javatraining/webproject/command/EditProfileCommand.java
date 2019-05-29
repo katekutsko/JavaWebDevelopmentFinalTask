@@ -12,12 +12,13 @@ import by.epam.javatraining.webproject.model.service.factory.ServiceFactory;
 import by.epam.javatraining.webproject.model.service.factory.ServiceType;
 import by.epam.javatraining.webproject.util.Messages;
 import by.epam.javatraining.webproject.util.Pages;
-import by.epam.javatraining.webproject.model.validation.RegistrationValidation;
+import by.epam.javatraining.webproject.model.validation.UserDataValidation;
 import by.epam.javatraining.webproject.util.Parameters;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 public class EditProfileCommand implements Command {
     private Logger logger;
@@ -28,7 +29,7 @@ public class EditProfileCommand implements Command {
 
     @Override
     public String execute(HttpServletRequest request, ActionType type) {
-        String page = Pages.REDIRECT_ERROR_PAGE;
+        String page = Pages.REDIRECT_EDIT_PROFILE;
         HttpSession session = request.getSession();
 
         if (type == ActionType.GET) {
@@ -43,6 +44,7 @@ public class EditProfileCommand implements Command {
                 String surname = request.getParameter(Parameters.SURNAME);
                 String patronymic = request.getParameter(Parameters.PATRONYMIC);
                 String login = request.getParameter(Parameters.LOGIN);
+                String phoneNumber = request.getParameter(Parameters.PHONE_NUMBER);
                 String oldPassword = request.getParameter(Parameters.OLD_PASSWORD);
                 String newPassword = request.getParameter(Parameters.NEW_PASSWORD);
                 String repeatNewPassword = request.getParameter(Parameters.REPEAT_NEW_PASSWORD);
@@ -50,54 +52,30 @@ public class EditProfileCommand implements Command {
                 UserService userService = (UserService) ServiceFactory.getService(ServiceType.USER_SERVICE);
                 userService.takeConnection();
 
-                if (RegistrationValidation.validateNameComponent(name) &&
-                        RegistrationValidation.validateNameComponent(surname) &&
-                        RegistrationValidation.validateNameComponent(patronymic) &&
-                        RegistrationValidation.validateLogin(login)) {
+                List<String> errors = UserDataValidation.formEditProfileErrorMessage(user, name, surname, patronymic, oldPassword, newPassword, repeatNewPassword, login, phoneNumber);
 
-                    if (RegistrationValidation.checkLoginUniqueness(user, userService, login)) {
-                        user.setName(name);
-                        user.setSurname(surname);
-                        user.setPatronymic(patronymic);
-                        user.setLogin(login);
+                if (errors == null) {
 
-                        if (!oldPassword.equals("") && !newPassword.equals("") && !repeatNewPassword.equals("")) {
+                    user.setPhoneNumber(phoneNumber);
+                    user.setName(name);
+                    user.setSurname(surname);
+                    user.setPatronymic(patronymic);
+                    user.setLogin(login);
 
-                            if (oldPassword.hashCode() == user.getPassword()) {
+                    if (!newPassword.equals("")) {
+                        user.setPassword(newPassword.hashCode());
+                    }
 
-                                if (RegistrationValidation.validatePassword(newPassword) && RegistrationValidation.validateRepeatPassword(newPassword,
-                                        repeatNewPassword)) {
-                                    user.setPassword(newPassword.hashCode());
-
-                                    if (updateUser(userService, request, user)) {
-                                        page = Pages.REDIRECT_VIEW_PROFILE;
-
-                                    } else {
-                                        session.setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
-                                    }
-                                } else {
-                                    session.setAttribute(Parameters.ERROR, Messages.INCORRECT_PASSWORD);
-                                }
-                            } else {
-                                session.setAttribute(Parameters.ERROR, Messages.INCORRECT_PASSWORD);
-                            }
-                        } else if (oldPassword.equals("") && newPassword.equals("") && repeatNewPassword.equals("")) {
-                            if (updateUser(userService, request, user)) {
-                                page = Pages.REDIRECT_VIEW_PROFILE;
-                            } else {
-                                session.setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
-                            }
-                        } else {
-                            session.setAttribute(Parameters.ERROR, Messages.INCORRECT_PASSWORD);
-                        }
+                    if (updateUser(userService, request, user)){
+                        page = Pages.REDIRECT_VIEW_PROFILE;
                     } else {
-                        session.setAttribute(Parameters.ERROR, Messages.LOGIN_EXISTS);
+                        page = Pages.REDIRECT_ERROR_PAGE;
+                        session.setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
                     }
                 } else {
-                    session.setAttribute(Parameters.ERROR, Messages.INVALID_DATA);
+                    session.setAttribute(Parameters.ERRORS, errors);
                 }
-
-
+                userService.releaseConnection();
             }
         }
         return page;
@@ -155,7 +133,6 @@ public class EditProfileCommand implements Command {
             logger.error(e.getMessage());
         }
         userService.setAutoCommit(true);
-        userService.releaseConnection();
         return result;
     }
 }

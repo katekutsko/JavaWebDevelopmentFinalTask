@@ -12,7 +12,7 @@ import by.epam.javatraining.webproject.model.service.factory.ServiceFactory;
 import by.epam.javatraining.webproject.model.service.factory.ServiceType;
 import by.epam.javatraining.webproject.util.Messages;
 import by.epam.javatraining.webproject.util.Pages;
-import by.epam.javatraining.webproject.model.validation.RegistrationValidation;
+import by.epam.javatraining.webproject.model.validation.UserDataValidation;
 import by.epam.javatraining.webproject.util.Parameters;
 import org.apache.log4j.Logger;
 
@@ -23,7 +23,6 @@ import java.util.List;
 
 public class RegisterCommand implements Command {
 
-    private final static int VALIDATION_PARAMETERS_AMOUNT = 4;
     private Logger logger;
 
     {
@@ -38,26 +37,28 @@ public class RegisterCommand implements Command {
 
         if (type == ActionType.POST) {
 
-            session.removeAttribute(Parameters.ERROR);
-
             String name = request.getParameter(Parameters.NAME);
             String surname = request.getParameter(Parameters.SURNAME);
             String patronymic = request.getParameter(Parameters.PATRONYMIC);
             String login = request.getParameter(Parameters.LOGIN);
             String password = request.getParameter(Parameters.PASSWORD);
             String repeatPassword = request.getParameter(Parameters.REPEAT_PASSWORD);
+            String phoneNumber = request.getParameter(Parameters.PHONE_NUMBER);
+            String sex = request.getParameter(Parameters.SEX);
+            String dateOfBirth = request.getParameter(Parameters.BIRTH_DATE);
+            //String chosenRole = request.getParameter(Parameters.ROLE);
 
             login = login.trim();
-            List<String> errorMessages = formErrorMessage(name, surname, patronymic, password, repeatPassword, login);
+            List<String> errorMessages = UserDataValidation.formRegistrationErrorMessage(name, surname, patronymic, password, repeatPassword, login, phoneNumber);
 
-            if (errorMessages.isEmpty()) {
+            if (errorMessages == null) {
 
                 try {
                     UserService userService = (UserService) ServiceFactory.getService(ServiceType.USER_SERVICE);
                     userService.takeConnection();
                     User user = (User) session.getAttribute(Parameters.USER);
 
-                    if (userService.login(login) == null) {
+                    if (userService.checkLoginUniqueness(user, login)) {
 
                         String role = request.getParameter(Parameters.ROLE);
                         UserRole userRole = UserRole.PATIENT;
@@ -66,16 +67,12 @@ public class RegisterCommand implements Command {
                             userRole = UserRole.valueOf(role);
                         }
 
-                        User newUser = new User(userRole, login, password.hashCode(), name, surname, patronymic);
+                        User newUser = new User(login, password.hashCode(), name, surname, patronymic, userRole, phoneNumber);
+                        userService.setAutoCommit(false);
                         userService.addUser(newUser);
 
                         if (user == null) {
-                            userService.setAutoCommit(false);
-
-                            String sex = request.getParameter(Parameters.SEX);
-                            String dateOfBirth = request.getParameter(Parameters.DATE);
-                            user = userService.login(login);
-                            int userId = user.getId();
+                            int userId = userService.getIdByLogin(login);
 
                             MedicalCardService cardService = (MedicalCardService) ServiceFactory.getService(ServiceType.MEDICAL_CARD_SERVICE);
                             cardService.setConnection(userService.getConnection());
@@ -85,64 +82,62 @@ public class RegisterCommand implements Command {
                                 int cardId = cardService.getIdByUserId(userId);
                                 card.setId(cardId);
                                 session.setAttribute(Parameters.CARD, card);
-                                session.setAttribute(Parameters.USER, user);
+                                session.setAttribute(Parameters.USER, newUser);
                                 page = Pages.REDIRECT_VIEW_PROFILE;
 
                             } else {
                                 userService.rollback();
                             }
-                            userService.setAutoCommit(true);
-                        } else {
+                        } else {/*
+                            if (UserRole.DOCTOR.name().equals(chosenRole)) {
+                                String specialisationAsString = request.getParameter(Parameters.SPECIALISATION);
+                                String officeNumberAsString = request.getParameter(Parameters.OFFICE_NUMBER);
+
+                                if (specialisationAsString != null && !specialisationAsString.isEmpty()){
+                                    Specialisation specialisation = Specialisation.valueOf(specialisationAsString);
+                                } else {
+                                    errorMessages.add(Messages.FIELDS_NOT_FILLED);
+                                }
+
+                                if (RegistrationValidation.validateOfficeNumber(officeNumberAsString)){
+
+                                } else {
+
+                                }
+                                Doctor doctor = new Doctor(specialisation,
+
+                            }
+                        }*/
                             page = Pages.REDIRECT_VIEW_USERS;
-                            session.removeAttribute(Parameters.ERRORS);
-                            session.removeAttribute(Parameters.ERROR);
                         }
+                        userService.setAutoCommit(true);
+                        session.removeAttribute(Parameters.ERRORS);
+                        session.removeAttribute(Parameters.R_ERROR);
+                    } else {
+                        page = Pages.REDIRECT_LOGIN + "login=" + login;
                     }
                     userService.releaseConnection();
+
                 } catch (UserServiceException | MedicalCardServiceException e) {
-                    logger.error("could not get message: " + e.getMessage());
+                    logger.error("could not register: " + e.getMessage());
                     page = Pages.REDIRECT_ERROR_PAGE;
-                    session.setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
+                    session.removeAttribute(Parameters.ERRORS);
+                    session.setAttribute(Parameters.R_ERROR, Messages.INTERNAL_ERROR);
                 }
             } else {
-                session.setAttribute(Parameters.ERRORS, errorMessages);
+                logger.debug(errorMessages);
+                if (UserDataValidation.lookForEmptyFields(name, surname, patronymic, password, login, phoneNumber, sex, dateOfBirth)) {
+                    session.removeAttribute(Parameters.ERRORS);
+                    session.setAttribute(Parameters.R_ERROR, Messages.FIELDS_NOT_FILLED);
+                } else {
+                    session.removeAttribute(Parameters.R_ERROR);
+                    session.setAttribute(Parameters.ERRORS, errorMessages);
+                }
             }
         } else {
             session.setAttribute(Parameters.ROLES, UserRole.values());
             page = Pages.REGISTRATION;
         }
         return page;
-    }
-
-    private List<String> formErrorMessage(String name, String surname, String patronymic, String password,
-                                          String repeatPassword, String login) {
-
-        boolean[] check = new boolean[VALIDATION_PARAMETERS_AMOUNT];
-        check[0] = (RegistrationValidation.validateNameComponent(name)
-                && RegistrationValidation.validateNameComponent(surname) && RegistrationValidation.validateNameComponent(patronymic));
-        check[1] = RegistrationValidation.validatePassword(password);
-        check[2] = RegistrationValidation.validateRepeatPassword(repeatPassword, password);
-        check[3] = RegistrationValidation.validateLogin(login);
-
-        String[] errorMessages = new String[4];
-        errorMessages[0] = Messages.INVALID_NAME;
-        errorMessages[1] = Messages.INVALID_PASSWORD;
-        errorMessages[2] = Messages.INCONSISTENT_PASSWORDS;
-        errorMessages[3] = Messages.INVALID_LOGIN;
-
-        List<String> errors = new ArrayList<>();
-
-        for (int i = 0; i < VALIDATION_PARAMETERS_AMOUNT; i++) {
-            if (!check[i]) {
-                logger.debug(i + " validation parameter was invalid");
-                errors.add(errorMessages[i]);
-            } else {
-                errors.add(null);
-            }
-        }
-        if (errors != null) {
-            logger.debug(errors);
-        }
-        return errors;
     }
 }

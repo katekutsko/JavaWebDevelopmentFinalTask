@@ -2,9 +2,7 @@ package by.epam.javatraining.webproject.command;
 
 import by.epam.javatraining.webproject.controller.ActionType;
 import by.epam.javatraining.webproject.model.entity.Case;
-import by.epam.javatraining.webproject.model.entity.Diagnosis;
 import by.epam.javatraining.webproject.model.service.CaseService;
-import by.epam.javatraining.webproject.model.service.exception.CaseServiceException;
 import by.epam.javatraining.webproject.model.service.exception.ServiceException;
 import by.epam.javatraining.webproject.model.service.factory.ServiceFactory;
 import by.epam.javatraining.webproject.model.service.factory.ServiceType;
@@ -14,8 +12,6 @@ import by.epam.javatraining.webproject.util.Parameters;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 
 public class EditCaseCommand implements Command {
 
@@ -98,7 +94,7 @@ public class EditCaseCommand implements Command {
 
                 if (foundCase != null) {
                     if (diagnosisAsString != null && dischargeDateAsString != null) {
-                        foundCase.setFinalDiagnosis(Diagnosis.valueOf(diagnosisAsString.toUpperCase()));
+                        foundCase.setFinalDiagnosis(diagnosisAsString);
                         foundCase.setDischargeDate(dischargeDateAsString);
                     }
                     if (admissionDateAsString != null && complaints != null) {

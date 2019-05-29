@@ -2,7 +2,6 @@ package by.epam.javatraining.webproject.command;
 
 import by.epam.javatraining.webproject.controller.ActionType;
 import by.epam.javatraining.webproject.model.entity.Case;
-import by.epam.javatraining.webproject.model.entity.Diagnosis;
 import by.epam.javatraining.webproject.model.service.CaseService;
 import by.epam.javatraining.webproject.model.service.exception.ServiceException;
 import by.epam.javatraining.webproject.model.service.factory.ServiceFactory;
@@ -32,20 +31,19 @@ public class DischargeCommand implements Command {
             String doctor = request.getParameter(Parameters.DOCTOR_ID);
             String diagnosisString = request.getParameter(Parameters.FINAL_DIAGNOSIS);
             String date = request.getParameter(Parameters.DISCHARGE_DATE);
-            String lastCaseId = request.getParameter(Parameters.LAST_CASE);
+            String lastCaseId = request.getParameter(Parameters.LAST_CASE_ID);
 
             logger.info("dischargement data: " + card + doctor + diagnosisString + date + lastCaseId);
 
             if (diagnosisString != null && date != null && lastCaseId != null && !lastCaseId.equals("")) {
 
-                Diagnosis diagnosis = Diagnosis.valueOf(diagnosisString.toUpperCase());
                 CaseService caseService = (CaseService) ServiceFactory.getService(ServiceType.CASE_SERVICE);
 
                 caseService.takeConnection();
 
                 try {
                     Case lastCase = (Case) caseService.getById(Integer.parseInt(lastCaseId));
-                    lastCase.setFinalDiagnosis(diagnosis);
+                    lastCase.setFinalDiagnosis(diagnosisString);
                     lastCase.setDischargeDate(date);
                     logger.debug("updated case in code");
 
@@ -65,7 +63,6 @@ public class DischargeCommand implements Command {
                 caseService.releaseConnection();
             }
         } else {
-            request.setAttribute(Parameters.DIAGNOSES, Diagnosis.values());
             request.setAttribute(Parameters.DISCHARGE_DATE, new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString());
             page = Pages.FORWARD_DISCHARGE;
         }

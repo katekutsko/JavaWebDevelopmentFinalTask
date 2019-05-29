@@ -8,6 +8,7 @@ public enum CommandType {
     VIEW_PROFILE(new ViewProfileCommand()),
     VIEW_ALL_PATIENTS(new ViewAllPatientsCommand()),
     MAKE_PRESCRIPTION(new MakePrescriptionCommand()),
+    MAKE_APPOINTMENT(new MakeAppointmentCommand()),
     DISCHARGE(new DischargeCommand()),
     SELECT_PATIENT(new SelectPatientCommand()),
     VIEW_HISTORY(new ViewPatientHistoryCommand()),
@@ -18,7 +19,10 @@ public enum CommandType {
     EDIT_CASE(new EditCaseCommand()),
     VIEW_ALL_USERS(new ViewAllUsersCommand()),
     DELETE_USER(new DeleteUserCommand()),
+    BLOCK_USER(new BlockUserCommand()),
     VIEW_PRESCRIPTIONS(new ViewPrescriptionsCommand()),
+    VIEW_APPOINTMENTS(new ViewAppointmentsCommand()),
+    CANCEL_APPOINTMENT(new CancelAppointmentCommand()),
     DELETE_CASE(new DeleteCaseCommand()),
     SEARCH(new SearchCommand());
 

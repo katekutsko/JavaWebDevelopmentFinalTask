@@ -13,6 +13,8 @@ import by.epam.javatraining.webproject.util.Parameters;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class ViewDoctorsCommand implements Command {
@@ -38,6 +40,13 @@ public class ViewDoctorsCommand implements Command {
 
             request.setAttribute(Parameters.DOCTORS, userList);
             request.setAttribute(Parameters.AMOUNT, userList.size());
+
+            User user = (User) request.getSession().getAttribute(Parameters.USER);
+
+            if (user != null && user.getRole() == UserRole.PATIENT){
+                String today = new SimpleDateFormat(Parameters.DATE_PATTERN).format(new Date());
+                request.setAttribute(Parameters.TODAY, today);
+            }
 
             logger.info("doctors were found and set as attributes: " + userList);
             logger.info("amount of doctors: " + userList.size());

@@ -66,6 +66,7 @@ public class ViewPatientHistoryCommand implements Command {
                     logger.error(e.getMessage());
                 }
                 request.setAttribute(Parameters.CASES, cases);
+                request.setAttribute(Parameters.CARD_ID, cardId);
                 request.setAttribute(Parameters.PATIENT_NAME, name);
 
                 if (cases != null && !cases.isEmpty()) {

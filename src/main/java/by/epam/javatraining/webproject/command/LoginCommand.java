@@ -10,6 +10,7 @@ import by.epam.javatraining.webproject.model.service.exception.UserServiceExcept
 import by.epam.javatraining.webproject.model.service.MedicalCardService;
 import by.epam.javatraining.webproject.model.service.factory.ServiceFactory;
 import by.epam.javatraining.webproject.model.service.factory.ServiceType;
+import by.epam.javatraining.webproject.util.Fields;
 import by.epam.javatraining.webproject.util.Messages;
 import by.epam.javatraining.webproject.util.Pages;
 import by.epam.javatraining.webproject.util.Parameters;
@@ -41,7 +42,7 @@ public class LoginCommand implements Command {
                 login = login.trim();
                 UserService userService = (UserService) ServiceFactory.getService(ServiceType.USER_SERVICE);
                 userService.takeConnection();
-                User user = null;
+                User user;
                 try {
                     user = userService.login(login);
 
@@ -50,19 +51,27 @@ public class LoginCommand implements Command {
                         long passwordHash = user.getPassword();
 
                         if (passwordHash == password.hashCode()) {
-                            logger.debug("successful log in as " + user.getRole());
-                            session.setAttribute(Parameters.USER, user);
+                            if (!user.getBlocked()) {
+                                logger.debug("successful log in as " + user.getRole());
+                                session.setAttribute(Parameters.USER, user);
 
-                            if (user.getRole() == UserRole.PATIENT) {
-                                MedicalCardService cardService = (MedicalCardService) ServiceFactory.getService(ServiceType.MEDICAL_CARD_SERVICE);
-                                cardService.setConnection(userService.getConnection());
-                                MedicalCard card = cardService.getByPatientId(user.getId());
-                                session.setAttribute(Parameters.CARD, card);
+                                if (user.getRole() == UserRole.PATIENT) {
+                                    MedicalCardService cardService = (MedicalCardService) ServiceFactory.getService(ServiceType.MEDICAL_CARD_SERVICE);
+                                    cardService.setConnection(userService.getConnection());
+                                    MedicalCard card = cardService.getByPatientId(user.getId());
+                                    session.setAttribute(Parameters.CARD, card);
+                                    logger.debug("card set as attribute: " + card);
+                                }
+                                page = Pages.REDIRECT_VIEW_PROFILE;
+                                session.removeAttribute(Parameters.ERROR);
+                                session.removeAttribute(Parameters.ERRORS);
+                                session.removeAttribute(Parameters.PASSWORD_ERROR);
+                                session.removeAttribute(Parameters.LOGIN_ERROR);
+                            } else {
+                                logger.debug("could not log in, user blocked");
+                                session.setAttribute(Fields.BLOCKED, Messages.BLOCKED_USER);
+                                page = page + Parameters.WARNING;
                             }
-                            page = Pages.REDIRECT_VIEW_PROFILE;
-                            session.removeAttribute(Parameters.ERROR);
-                            session.removeAttribute(Parameters.PASSWORD_ERROR);
-                            session.removeAttribute(Parameters.LOGIN_ERROR);
                         } else {
                             logger.info("wrong password");
                             session.removeAttribute(Parameters.ERROR);

@@ -27,7 +27,7 @@ public class ViewAllUsersCommand implements Command {
     @Override
     public String execute(HttpServletRequest request, ActionType type) {
 
-        String page = Pages.ERROR_PAGE;
+        String page = Pages.REDIRECT_ERROR_PAGE;
 
         if (type == ActionType.GET) {
             UserService userService = (UserService) ServiceFactory.getService(ServiceType.USER_SERVICE);
@@ -50,6 +50,8 @@ public class ViewAllUsersCommand implements Command {
             } finally {
                 userService.releaseConnection();
             }
+        } else {
+            page = Pages.REDIRECT_VIEW_USERS;
         }
         return page;
     }

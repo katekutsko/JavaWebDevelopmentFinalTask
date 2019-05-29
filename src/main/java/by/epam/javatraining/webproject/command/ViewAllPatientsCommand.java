@@ -57,10 +57,9 @@ public class ViewAllPatientsCommand implements Command {
                     } catch (CaseServiceException e) {
                         logger.error(e.getMessage());
                     }
-
-                    logger.info("patients were found and set as attributes");
-                    logger.info("amount of patients: " + userList.size());
                 }
+                logger.info("patients were found and set as attributes");
+                logger.info("amount of patients: " + userList.size());
                 request.setAttribute(Parameters.PATIENTS, userList);
                 request.setAttribute(Parameters.CARDS, cardList);
                 request.setAttribute(Parameters.CASES, lastCasesList);

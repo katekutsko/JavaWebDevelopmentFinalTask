@@ -38,6 +38,7 @@ public class SelectPatientCommand implements Command {
             cardService.takeConnection();
             try {
                 MedicalCard card = (MedicalCard) cardService.getById(id);
+                logger.debug("selected patient's card: " + card);
 
                 if (card != null) {
                     UserService userService = (UserService) ServiceFactory.getService(ServiceType.USER_SERVICE);

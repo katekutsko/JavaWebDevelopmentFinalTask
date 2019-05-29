@@ -2,7 +2,7 @@ package by.epam.javatraining.webproject.command;
 
 import by.epam.javatraining.webproject.controller.ActionType;
 import by.epam.javatraining.webproject.model.entity.Prescription;
-import by.epam.javatraining.webproject.model.entity.PrescriptionType;
+import by.epam.javatraining.webproject.model.entity.prescriptiontype.PrescriptionType;
 import by.epam.javatraining.webproject.model.service.PrescriptionService;
 import by.epam.javatraining.webproject.model.service.exception.ServiceException;
 import by.epam.javatraining.webproject.model.service.factory.ServiceFactory;

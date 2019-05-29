@@ -24,23 +24,10 @@ public class ViewProfileCommand implements Command {
 
     @Override
     public String execute(HttpServletRequest request, ActionType type) {
-        String page = null;
+        String page = Pages.REDIRECT_ERROR_PAGE;
+
         if (type == ActionType.GET) {
-            User user = (User) request.getSession().getAttribute(Parameters.USER);
-            if (user != null) {
-                MedicalCardService cardService = (MedicalCardService) ServiceFactory.getService(ServiceType.MEDICAL_CARD_SERVICE);
-                try {
-                    if (user.getRole() == UserRole.PATIENT) {
-                        cardService.takeConnection();
-                        MedicalCard card = cardService.getByPatientId(user.getId());
-                        cardService.releaseConnection();
-                        request.getSession().setAttribute(Parameters.MEDICAL_CARD, card);
-                    }
-                } catch (MedicalCardServiceException e) {
-                    logger.error(e.getMessage());
-                }
-                page = Pages.FORWARD_VIEW_PROFILE;
-            }
+            page = Pages.FORWARD_VIEW_PROFILE;
         }
         return page;
     }
