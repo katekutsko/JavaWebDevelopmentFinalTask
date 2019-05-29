@@ -4,6 +4,7 @@ import by.epam.javatraining.webproject.command.Command;
 import by.epam.javatraining.webproject.command.CommandManager;
 import by.epam.javatraining.webproject.command.CommandType;
 import by.epam.javatraining.webproject.command.RegisterCommand;
+import by.epam.javatraining.webproject.model.dao.connection.ConnectionPool;
 import by.epam.javatraining.webproject.util.Messages;
 import by.epam.javatraining.webproject.util.Pages;
 import by.epam.javatraining.webproject.util.Parameters;
@@ -35,31 +36,25 @@ public class Controller extends HttpServlet {
     private void process(HttpServletRequest request, HttpServletResponse response, ActionType type) {
 
         String commandName = request.getParameter(Parameters.COMMAND);
+        Command command = CommandManager.getCommand(commandName);
+        logger.debug(commandName + " extracted");
+        String page = command.execute(request, type);
 
-        if (commandName != null) {
-            Command command = CommandManager.getCommand(CommandType.valueOf(commandName.toUpperCase()));
-            logger.debug(commandName + " extracted");
-
-            String page = command.execute(request, type);
-
-            try {
-                if (type == ActionType.GET) {
-                    logger.debug("forwarded to " + page);
-                    request.getRequestDispatcher(page).forward(request, response);
-                } else {
-                    logger.debug("redirected to " + page);
-                    response.sendRedirect(request.getContextPath() + "/" + page);
-                }
-            } catch (ServletException | IOException e) {
-                logger.error("exception in servlet: " + e.getMessage());
+        try {
+            if (type == ActionType.GET) {
+                logger.debug("forwarded to " + page);
+                request.getRequestDispatcher(page).forward(request, response);
+            } else {
+                logger.debug("redirected to " + page);
+                response.sendRedirect(request.getContextPath() + "/" + page);
             }
-        } else {
-            try {
-                request.setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
-                request.getRequestDispatcher(Pages.ERROR_PAGE).forward(request, response);
-            } catch (ServletException | IOException e) {
-                logger.error(e.getMessage());
-            }
+        } catch (ServletException | IOException e) {
+            logger.error("exception in servlet: " + e.getMessage());
         }
+    }
+
+    @Override
+    public void destroy() {
+        ConnectionPool.getInstance().closeAll();
     }
 }

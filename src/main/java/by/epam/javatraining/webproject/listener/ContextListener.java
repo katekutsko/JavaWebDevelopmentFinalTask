@@ -20,7 +20,6 @@ public class ContextListener implements ServletContextListener {
         ServletContext servletContext = event.getServletContext();
         initLog4J(servletContext);
         initI18N(servletContext);
-
     }
 
     public void contextDestroyed(ServletContextEvent event) {
