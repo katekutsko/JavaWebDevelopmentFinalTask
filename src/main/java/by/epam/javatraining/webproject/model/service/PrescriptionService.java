@@ -4,7 +4,7 @@ import by.epam.javatraining.webproject.model.dao.implementation.PrescriptionDAO;
 import by.epam.javatraining.webproject.model.dao.factory.DAOFactory;
 import by.epam.javatraining.webproject.model.dao.factory.DAOType;
 import by.epam.javatraining.webproject.model.entity.Prescription;
-import by.epam.javatraining.webproject.model.exception.PrescriptionDAOException;
+import by.epam.javatraining.webproject.model.dao.exception.PrescriptionDAOException;
 import by.epam.javatraining.webproject.model.service.exception.PrescriptionServiceException;
 
 import java.util.List;

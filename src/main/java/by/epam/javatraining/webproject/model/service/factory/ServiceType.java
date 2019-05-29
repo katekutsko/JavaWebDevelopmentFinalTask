@@ -6,11 +6,12 @@ public enum ServiceType {
     USER_SERVICE(new UserService()),
     MEDICAL_CARD_SERVICE(new MedicalCardService()),
     CASE_SERVICE(new CaseService()),
-    PRESCRIPTION_SERVICE(new PrescriptionService());
+    PRESCRIPTION_SERVICE(new PrescriptionService()),
+    APPOINTMENT_SERVICE(new AppointmentService());
 
     private Service service;
 
-    private ServiceType(Service service){
+    ServiceType(Service service){
         this.service = service;
     }
 

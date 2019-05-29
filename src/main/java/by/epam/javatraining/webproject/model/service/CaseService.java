@@ -7,7 +7,7 @@ import by.epam.javatraining.webproject.model.entity.Case;
 import by.epam.javatraining.webproject.model.entity.Entity;
 import by.epam.javatraining.webproject.model.entity.MedicalCard;
 import by.epam.javatraining.webproject.model.entity.User;
-import by.epam.javatraining.webproject.model.exception.CaseDAOException;
+import by.epam.javatraining.webproject.model.dao.exception.CaseDAOException;
 import by.epam.javatraining.webproject.model.service.exception.CaseServiceException;
 import by.epam.javatraining.webproject.model.service.exception.ServiceException;
 import by.epam.javatraining.webproject.model.service.factory.ServiceFactory;
@@ -36,26 +36,23 @@ public class CaseService extends Service {
     }
 
     public List<Case> getAllCasesOfCertainPatient(int cardId) throws CaseServiceException {
-        List<Case> caseList = null;
+
         try {
-            caseList = caseDAO.getAllCasesOfCertainPatient(cardId);
+            return caseDAO.getAllCasesOfCertainPatient(cardId);
         } catch (CaseDAOException e) {
             logger.error(e.getMessage());
             throw new CaseServiceException(e.getMessage());
         }
-        return caseList;
     }
 
     public boolean closeCase(Case lastCase) throws CaseServiceException {
-        boolean result = false;
+
         try {
-            caseDAO.closeCase(lastCase);
-            result = true;
+            return caseDAO.closeCase(lastCase);
         } catch (CaseDAOException e) {
             logger.error(e.getMessage());
             throw new CaseServiceException(e.getMessage());
         }
-        return result;
     }
 
     @Override
@@ -87,7 +84,6 @@ public class CaseService extends Service {
     }
 
     public boolean deleteCase(Case deletedCase){
-        CaseDAO caseDAO = (CaseDAO) DAOFactory.getDAO(DAOType.CASE_DAO);
         return caseDAO.delete(deletedCase);
     }
 }

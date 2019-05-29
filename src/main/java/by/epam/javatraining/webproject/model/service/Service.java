@@ -2,8 +2,8 @@ package by.epam.javatraining.webproject.model.service;
 
 import by.epam.javatraining.webproject.model.dao.AbstractDAO;
 import by.epam.javatraining.webproject.model.entity.Entity;
-import by.epam.javatraining.webproject.model.exception.CommitException;
-import by.epam.javatraining.webproject.model.exception.DAOException;
+import by.epam.javatraining.webproject.model.dao.exception.CommitException;
+import by.epam.javatraining.webproject.model.dao.exception.DAOException;
 import by.epam.javatraining.webproject.model.service.exception.ServiceException;
 import org.apache.log4j.Logger;
 

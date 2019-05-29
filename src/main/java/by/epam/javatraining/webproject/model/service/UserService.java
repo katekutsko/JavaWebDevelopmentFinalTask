@@ -5,8 +5,8 @@ import by.epam.javatraining.webproject.model.dao.factory.DAOType;
 import by.epam.javatraining.webproject.model.dao.implementation.UserDAO;
 import by.epam.javatraining.webproject.model.entity.User;
 import by.epam.javatraining.webproject.model.entity.role.UserRole;
-import by.epam.javatraining.webproject.model.exception.DAOException;
-import by.epam.javatraining.webproject.model.exception.UserDAOException;
+import by.epam.javatraining.webproject.model.dao.exception.DAOException;
+import by.epam.javatraining.webproject.model.dao.exception.UserDAOException;
 import by.epam.javatraining.webproject.model.service.exception.UserServiceException;
 
 import java.util.*;
@@ -18,6 +18,35 @@ public class UserService extends Service {
     {
         userDAO = (UserDAO) DAOFactory.getDAO(DAOType.USER_DAO);
         dao = userDAO;
+    }
+
+    public boolean checkLoginUniqueness(User sessionUser, String login) {
+        boolean result = false;
+        try {
+            User user = login(login);
+            if (user == null || user.equals(sessionUser)) {
+                logger.debug("comparing users: " + user + " " + sessionUser);
+                result = true;
+            }
+        } catch (UserServiceException e) {
+            logger.error(e.getMessage());
+        }
+        return result;
+    }
+
+    public boolean setBlocking(User user) throws UserServiceException {
+        try {
+            if (user != null) {
+                logger.debug("blocking user: " + user);
+                user.setBlocked(!user.getBlocked());
+                return userDAO.setBlocking(user.getId(), user.getBlocked());
+            }
+            logger.debug("user was null");
+        } catch (UserDAOException e) {
+            logger.error(e.getMessage());
+            throw new UserServiceException(e.getMessage());
+        }
+         return false;
     }
 
     public User login(String login) throws UserServiceException {
@@ -36,7 +65,7 @@ public class UserService extends Service {
         try {
             user = (User) userDAO.getById(id);
             String name = null;
-            if (user != null){
+            if (user != null) {
                 name = user.getSurname() + " " + user.getName() + " " + user.getPatronymic();
             }
             return name;
@@ -47,11 +76,10 @@ public class UserService extends Service {
 
     }
 
-    public void addUser(User newUser) throws UserServiceException {
+    public boolean addUser(User newUser) throws UserServiceException {
 
         try {
-            userDAO.insert(newUser);
-
+            return userDAO.insert(newUser);
         } catch (UserDAOException e) {
             logger.error(e.getMessage());
             throw new UserServiceException(e.getMessage());
@@ -68,14 +96,13 @@ public class UserService extends Service {
     }
 
     public List<User> getAllOfType(UserRole role) throws UserServiceException {
-        List<User> userList = null;
+
         try {
-            userList = userDAO.getAllOfType(role);
+            return userDAO.getAllOfType(role);
         } catch (UserDAOException e) {
             logger.error(e.getMessage());
             throw new UserServiceException(e.getMessage());
         }
-        return userList;
     }
 
 
@@ -112,7 +139,8 @@ public class UserService extends Service {
                 byte count = 0;
 
                 for (String namePart : nameParts) {
-                    if (namePart.equals(patientName) || namePart.equals(patientSurname) || namePart.equals(patientPatronymic)) {
+                    if (namePart.equalsIgnoreCase(patientName) || namePart.equalsIgnoreCase(patientSurname)
+                            || namePart.equalsIgnoreCase(patientPatronymic)) {
                         count++;
                     }
                 }
