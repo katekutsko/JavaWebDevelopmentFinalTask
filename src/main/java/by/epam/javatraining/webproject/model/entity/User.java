@@ -7,33 +7,46 @@ import java.util.Objects;
 public class User extends Entity {
 
     private String login;
-    private long password;
+    private int password;
     private String name;
     private String surname;
     private String patronymic;
     private UserRole role;
+    private String phoneNumber;
+    private boolean blocked;
 
-    public User(int id, UserRole role, String login, long password, String name, String surname, String patronymic) {
+    public User(int id, String login, int password, String name, String surname, String patronymic, UserRole role, String phoneNumber) {
         super(id);
-        this.role = role;
         this.login = login;
+        this.password = password;
         this.name = name;
         this.surname = surname;
         this.patronymic = patronymic;
-        this.password = password;
+        this.role = role;
+        this.phoneNumber = phoneNumber;
+        this.blocked = false;
     }
 
-    public User( UserRole role, String login, long password, String name, String surname, String patronymic) {
-        super();
-        this.role = role;
+    public User(String login, int password, String name, String surname, String patronymic, UserRole role, String phoneNumber) {
         this.login = login;
+        this.password = password;
         this.name = name;
         this.surname = surname;
         this.patronymic = patronymic;
-        this.password = password;
+        this.role = role;
+        this.phoneNumber = phoneNumber;
+        this.blocked = false;
     }
 
     public User() {
+    }
+
+    public boolean getBlocked() {
+        return blocked;
+    }
+
+    public void setBlocked(boolean blocked) {
+        this.blocked = blocked;
     }
 
     public String getLogin() {
@@ -44,11 +57,11 @@ public class User extends Entity {
         this.login = login;
     }
 
-    public long getPassword() {
+    public int getPassword() {
         return password;
     }
 
-    public void setPassword(long password) {
+    public void setPassword(int password) {
         this.password = password;
     }
 
@@ -84,34 +97,45 @@ public class User extends Entity {
         this.role = role;
     }
 
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
         return password == user.password &&
-                Objects.equals(login, user.login) &&
-                Objects.equals(name, user.name) &&
-                Objects.equals(surname, user.surname) &&
-                Objects.equals(patronymic, user.patronymic) &&
-                role == user.role;
+                login.equals(user.login) &&
+                name.equals(user.name) &&
+                surname.equals(user.surname) &&
+                patronymic.equals(user.patronymic) &&
+                role == user.role &&
+                phoneNumber.equals(user.phoneNumber);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(login, password, name, surname, patronymic, role);
+        return Objects.hash(login, password, name, surname, patronymic, role, phoneNumber);
     }
 
     @Override
     public String toString() {
         return "User{" +
                 "login='" + login + '\'' +
-                ", password='" + password + '\'' +
+                ", password=" + password +
                 ", name='" + name + '\'' +
                 ", surname='" + surname + '\'' +
                 ", patronymic='" + patronymic + '\'' +
                 ", role=" + role +
+                ", phoneNumber='" + phoneNumber + '\'' +
                 ", id=" + id +
+                ", blocked=" + blocked +
                 '}';
     }
 }

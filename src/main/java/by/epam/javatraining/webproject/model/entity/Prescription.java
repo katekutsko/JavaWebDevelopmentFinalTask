@@ -1,5 +1,7 @@
 package by.epam.javatraining.webproject.model.entity;
 
+import by.epam.javatraining.webproject.model.entity.prescriptiontype.PrescriptionType;
+
 public class Prescription extends Entity {
 
     private int cardId;

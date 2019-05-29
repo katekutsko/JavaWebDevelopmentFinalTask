@@ -4,7 +4,7 @@ public class Case extends Entity{
 
     private String admissionDate;
     private String dischargeDate;
-    private Diagnosis finalDiagnosis;
+    private String finalDiagnosis;
     private int medicalCardId;
     private int active;
     private int doctorId;
@@ -13,7 +13,7 @@ public class Case extends Entity{
     public Case() {
     }
 
-    public Case(String admissionDate, String dischargeDate, Diagnosis finalDiagnosis, int medicalCardId, int doctorId, String complaints) {
+    public Case(String admissionDate, String dischargeDate, String finalDiagnosis, int medicalCardId, int doctorId, String complaints) {
         this.admissionDate = admissionDate;
         this.dischargeDate = dischargeDate;
         this.finalDiagnosis = finalDiagnosis;
@@ -38,11 +38,11 @@ public class Case extends Entity{
         this.dischargeDate = dischargeDate;
     }
 
-    public Diagnosis getFinalDiagnosis() {
+    public String getFinalDiagnosis() {
         return finalDiagnosis;
     }
 
-    public void setFinalDiagnosis(Diagnosis finalDiagnosis) {
+    public void setFinalDiagnosis(String finalDiagnosis) {
         this.finalDiagnosis = finalDiagnosis;
     }
 
