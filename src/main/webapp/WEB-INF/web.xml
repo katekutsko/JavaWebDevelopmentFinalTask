@@ -31,6 +31,70 @@
     <url-pattern>/*</url-pattern>
   </filter-mapping>
 
+    <filter>
+        <filter-name>UnregisteredUserFilter</filter-name>
+        <filter-class>by.epam.javatraining.webproject.filter.UnregisteredUserFilter</filter-class>
+        <init-param>
+            <param-name>unauthorizedCommands</param-name>
+            <param-value>search view_doctors register login no_command</param-value>
+        </init-param>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>UnregisteredUserFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>AdminFilter</filter-name>
+        <filter-class>by.epam.javatraining.webproject.filter.AdminFilter</filter-class>
+        <init-param>
+            <param-name>adminCommands</param-name>
+            <param-value>view_all_users block_user delete_user</param-value>
+        </init-param>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>AdminFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>DoctorFilter</filter-name>
+        <filter-class>by.epam.javatraining.webproject.filter.DoctorFilter</filter-class>
+        <init-param>
+            <param-name>doctorCommands</param-name>
+            <param-value>add_record discharge delete_case edit_case</param-value>
+        </init-param>
+        <init-param>
+            <param-name>medicalStaffCommands</param-name>
+            <param-value>view_all_patients make_prescription</param-value>
+        </init-param>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>DoctorFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>PatientFilter</filter-name>
+        <filter-class>by.epam.javatraining.webproject.filter.PatientFilter</filter-class>
+        <init-param>
+            <param-name>patientCommands</param-name>
+            <param-value>make_appointment cancel_appointment view_prescriptions</param-value>
+        </init-param>
+        <init-param>
+            <param-name>patientRelatedCommands</param-name>
+            <param-value>view_appointments view_history</param-value>
+        </init-param>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>PatientFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
 	<context-param>
 		<param-name>javax.servlet.jsp.jstl.fmt.localizationContext</param-name>
 		<param-value>localisation</param-value>
