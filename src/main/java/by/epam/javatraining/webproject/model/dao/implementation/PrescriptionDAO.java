@@ -4,9 +4,8 @@ import by.epam.javatraining.webproject.model.dao.AbstractDAO;
 import by.epam.javatraining.webproject.model.dao.IPrescriptionDAO;
 import by.epam.javatraining.webproject.model.entity.Entity;
 import by.epam.javatraining.webproject.model.entity.Prescription;
-import by.epam.javatraining.webproject.model.entity.PrescriptionType;
-import by.epam.javatraining.webproject.model.exception.PrescriptionDAOException;
-import org.apache.log4j.Logger;
+import by.epam.javatraining.webproject.model.entity.prescriptiontype.PrescriptionType;
+import by.epam.javatraining.webproject.model.dao.exception.PrescriptionDAOException;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,12 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PrescriptionDAO extends AbstractDAO implements IPrescriptionDAO {
-
-    private Logger logger;
-
-    {
-        logger = Logger.getRootLogger();
-    }
 
     private static final String INSERT_PRESCRIPTION = "INSERT INTO prescription VALUES(default, ?, ?, ?, ?, ?, ?)";
 

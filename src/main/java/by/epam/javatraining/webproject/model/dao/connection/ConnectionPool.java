@@ -73,4 +73,14 @@ public class ConnectionPool {
              connections.add(connection);
          }
     }
+
+    public void closeAll() {
+         for (Connection connection : connections){
+             try {
+                 connection.close();
+             } catch (SQLException e) {
+                 logger.error(e.getMessage());
+             }
+         }
+    }
 }

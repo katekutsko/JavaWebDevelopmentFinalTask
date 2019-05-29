@@ -4,7 +4,7 @@ import by.epam.javatraining.webproject.model.dao.AbstractDAO;
 import by.epam.javatraining.webproject.model.dao.IMedicalCardDAO;
 import by.epam.javatraining.webproject.model.entity.Entity;
 import by.epam.javatraining.webproject.model.entity.MedicalCard;
-import by.epam.javatraining.webproject.model.exception.MedicalCardDAOException;
+import by.epam.javatraining.webproject.model.dao.exception.MedicalCardDAOException;
 import org.apache.log4j.Logger;
 
 import java.sql.PreparedStatement;
@@ -20,12 +20,6 @@ public class MedicalCardDAO extends AbstractDAO implements IMedicalCardDAO {
     public static final String ADD_MEDICAL_CARD = "INSERT INTO medical_card(iduser, sex, birth_date) VALUES(?, ?, ?)";
     public static final String UPDATE_MEDICAL_CARD = "UPDATE medical_card SET sex = ?, birth_date = ? WHERE idmedical_card = ?";
     public static final String DELETE_MEDICAL_CARD = "DELETE FROM medical_card WHERE idmedical_card = ?";
-
-    private Logger logger;
-
-    {
-        logger = Logger.getRootLogger();
-    }
 
     @Override
     public MedicalCard getByPatientId(int userId) throws MedicalCardDAOException {

@@ -1,7 +1,7 @@
 package by.epam.javatraining.webproject.model.dao;
 
 import by.epam.javatraining.webproject.model.entity.Prescription;
-import by.epam.javatraining.webproject.model.exception.PrescriptionDAOException;
+import by.epam.javatraining.webproject.model.dao.exception.PrescriptionDAOException;
 
 import java.util.List;
 

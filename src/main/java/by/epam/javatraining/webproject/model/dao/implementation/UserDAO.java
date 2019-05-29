@@ -5,8 +5,9 @@ import by.epam.javatraining.webproject.model.dao.IUserDAO;
 import by.epam.javatraining.webproject.model.entity.Entity;
 import by.epam.javatraining.webproject.model.entity.role.UserRole;
 import by.epam.javatraining.webproject.model.entity.User;
-import by.epam.javatraining.webproject.model.exception.UserDAOException;
-import org.apache.log4j.Logger;
+import by.epam.javatraining.webproject.model.dao.exception.UserDAOException;
+import by.epam.javatraining.webproject.util.Fields;
+import by.epam.javatraining.webproject.util.Parameters;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,35 +17,20 @@ import java.util.List;
 
 public class UserDAO extends AbstractDAO implements IUserDAO {
 
-    private static Logger logger;
-
-    {
-        logger = Logger.getRootLogger();
-    }
-
-    public static final String FIND_ALL = "SELECT iduser, first_name, last_name, login, password, patronymic, role_type FROM user INNER JOIN " +
+    private static final String FIND_ALL = "SELECT iduser, first_name, last_name, login, password, patronymic, role_type, phone_number, blocked FROM user INNER JOIN " +
             "user_role ON user.iduser_role = user_role.iduser_role";
-    public static final String FIND_ALL_OF_TYPE = FIND_ALL + " WHERE user_role.role_type = ?";
-    public static final String FIND_BY_ID = "SELECT iduser, first_name, last_name, login, password, patronymic, role_type FROM user INNER JOIN " +
+    private static final String FIND_ALL_OF_TYPE = FIND_ALL + " WHERE user_role.role_type = ?";
+    private static final String FIND_BY_ID = "SELECT iduser, first_name, last_name, login, password, patronymic, role_type, phone_number, blocked FROM user INNER JOIN " +
             "user_role ON user.iduser_role = user_role.iduser_role WHERE iduser = ?";
 
-    public static final String INSERT_USER = "INSERT INTO user(first_name, last_name, patronymic, login, password, iduser_role) VALUES(?, ?, ?, ?, ?, ?)";
-    public static final String GET_USER_ID = "SELECT iduser FROM hospital.user WHERE login = ? ";
-    public static final String FIND_BY_LOGIN = "SELECT iduser, first_name, last_name, login, password, patronymic, role_type FROM user INNER JOIN " +
+    private static final String INSERT_USER = "INSERT INTO user(first_name, last_name, patronymic, login, password, iduser_role, phone_number, blocked) VALUES(?, ?, ?, ?, ?, ?, ?, false)";
+    private static final String GET_USER_ID = "SELECT iduser FROM hospital.user WHERE login = ? ";
+    private static final String FIND_BY_LOGIN = "SELECT iduser, first_name, last_name, login, password, patronymic, role_type, phone_number, blocked FROM user INNER JOIN " +
             "user_role ON user.iduser_role = user_role.iduser_role WHERE login = ?";
 
-    public static final String UPDATE_USER = "UPDATE user SET first_name=?, last_name=?, patronymic=?, login=?, password=?, iduser_role=? WHERE iduser=?";
-    public static final String DELETE_USER = "DELETE FROM user WHERE iduser = ?";
-
-    @Override
-    public List<User> findByLastName(String lastName) {
-        return null;
-    }
-
-    @Override
-    public User findByFullName(String lastName, String firstName, String patronymic) {
-        return null;
-    }
+    private static final String UPDATE_USER = "UPDATE user SET first_name=?, last_name=?, patronymic=?, login=?, password=?, iduser_role=?, phone_number=? WHERE iduser=?";
+    private static final String DELETE_USER = "DELETE FROM user WHERE iduser = ?";
+    private static final String BLOCK_USER = "UPDATE user SET blocked=? WHERE iduser=?";
 
     @Override
     public User getByLogin(String login) throws UserDAOException {
@@ -63,31 +49,47 @@ public class UserDAO extends AbstractDAO implements IUserDAO {
                 return user;
             } catch (SQLException e) {
                 throw new UserDAOException("could not get user by id: " + e.getMessage());
-                }
+            }
         } else {
             logger.info("login was null");
         }
         return null;
     }
 
+    @Override
+    public boolean setBlocking(int id, boolean blocked) throws UserDAOException {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(BLOCK_USER);
+            preparedStatement.setBoolean(1, blocked);
+            preparedStatement.setInt(2, id);
+
+            logger.debug("blocked id - " + id + ", blocked - " + blocked);
+            return preparedStatement.executeUpdate() == 1;
+        } catch (SQLException e) {
+            throw new UserDAOException("could not block user with id " + id + ": " + e.getMessage());
+        }
+    }
+
     private List<User> unmarshal(ResultSet resultSet) throws SQLException {
 
         if (resultSet != null) {
-                List<User> userList = new ArrayList<>();
+            List<User> userList = new ArrayList<>();
 
-                while (resultSet.next()) {
-                    User user = new User();
+            while (resultSet.next()) {
+                User user = new User();
 
-                    user.setId(resultSet.getInt("iduser"));
-                    user.setLogin(resultSet.getString("login"));
-                    user.setPassword(resultSet.getLong("password"));
-                    user.setName(resultSet.getString("first_name"));
-                    user.setSurname(resultSet.getString("last_name"));
-                    user.setPatronymic(resultSet.getString("patronymic"));
-                    user.setRole(UserRole.valueOf(resultSet.getString("role_type")));
-                    userList.add(user);
-                }
-                return userList;
+                user.setId(resultSet.getInt(Fields.IDUSER));
+                user.setLogin(resultSet.getString(Parameters.LOGIN));
+                user.setPassword(resultSet.getInt(Parameters.PASSWORD));
+                user.setName(resultSet.getString(Fields.FIRST_NAME));
+                user.setPhoneNumber(resultSet.getString(Parameters.PHONE_NUMBER));
+                user.setSurname(resultSet.getString(Fields.LAST_NAME));
+                user.setPatronymic(resultSet.getString(Parameters.PATRONYMIC));
+                user.setRole(UserRole.valueOf(resultSet.getString(Fields.ROLE_TYPE)));
+                user.setBlocked(resultSet.getBoolean(Fields.BLOCKED));
+                userList.add(user);
+            }
+            return userList;
         }
         return null;
     }
@@ -150,6 +152,7 @@ public class UserDAO extends AbstractDAO implements IUserDAO {
                 preparedStatement.setString(4, user.getLogin());
                 preparedStatement.setLong(5, user.getPassword());
                 preparedStatement.setString(1, user.getName());
+                preparedStatement.setString(7, user.getPhoneNumber());
                 preparedStatement.setString(2, user.getSurname());
                 preparedStatement.setString(3, user.getPatronymic());
 
@@ -193,9 +196,10 @@ public class UserDAO extends AbstractDAO implements IUserDAO {
 
             try {
                 PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_USER);
-                preparedStatement.setInt(7, user.getId());
+                preparedStatement.setInt(8, user.getId());
                 preparedStatement.setString(1, user.getName());
                 preparedStatement.setString(2, user.getSurname());
+                preparedStatement.setString(7, user.getPhoneNumber());
                 preparedStatement.setString(3, user.getPatronymic());
                 preparedStatement.setString(4, user.getLogin());
                 preparedStatement.setLong(5, user.getPassword());

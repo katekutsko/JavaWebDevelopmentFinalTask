@@ -1,7 +1,7 @@
 package by.epam.javatraining.webproject.model.dao;
 
 import by.epam.javatraining.webproject.model.dao.connection.ConnectionPool;
-import by.epam.javatraining.webproject.model.exception.CommitException;
+import by.epam.javatraining.webproject.model.dao.exception.CommitException;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -12,7 +12,7 @@ public abstract class AbstractDAO implements IDAO {
     private ConnectionPool pool;
     protected Connection connection;
 
-    private Logger logger;
+    protected Logger logger;
 
     {
         pool = ConnectionPool.getInstance();

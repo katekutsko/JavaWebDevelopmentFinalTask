@@ -3,14 +3,9 @@ package by.epam.javatraining.webproject.model.dao.implementation;
 import by.epam.javatraining.webproject.model.dao.AbstractDAO;
 import by.epam.javatraining.webproject.model.dao.ICaseDAO;
 import by.epam.javatraining.webproject.model.entity.Case;
-import by.epam.javatraining.webproject.model.entity.Diagnosis;
 import by.epam.javatraining.webproject.model.entity.Entity;
-import by.epam.javatraining.webproject.model.exception.CaseDAOException;
+import by.epam.javatraining.webproject.model.dao.exception.CaseDAOException;
 import by.epam.javatraining.webproject.util.Fields;
-import by.epam.javatraining.webproject.util.Parameters;
-import by.epam.javatraining.webproject.util.configuration.ConfigurationData;
-import org.apache.log4j.Logger;
-import org.apache.log4j.xml.DOMConfigurator;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -19,13 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CaseDAO extends AbstractDAO implements ICaseDAO {
-
-    private Logger logger;
-
-    {
-        logger = Logger.getRootLogger();
-        DOMConfigurator.configure(ConfigurationData.getString(ConfigurationData.LOG4J_XML));
-    }
 
     private static final String FIND_ALL = "SELECT idcase, admission_date, complaints, discharge_date, final_diagnosis," +
             "idmedical_card, active, iddoctor FROM hospital.case";
@@ -64,9 +52,9 @@ public class CaseDAO extends AbstractDAO implements ICaseDAO {
 
     private List<Case> unmarshal(ResultSet resultSet) throws SQLException {
 
-        if (resultSet != null) {
-            List<Case> caseList = new ArrayList<>();
+        List<Case> caseList = new ArrayList<>();
 
+        if (resultSet != null) {
             while (resultSet.next()) {
                 Case foundCase = new Case();
                 foundCase.setId(resultSet.getInt(Fields.IDCASE));
@@ -74,22 +62,16 @@ public class CaseDAO extends AbstractDAO implements ICaseDAO {
                 foundCase.setDischargeDate(resultSet.getString(Fields.DISCHARGE_DATE));
                 foundCase.setActive(resultSet.getInt(Fields.ACTIVE));
                 foundCase.setDoctorId(resultSet.getInt(Fields.IDDOCTOR));
-                int diagnosisId = resultSet.getInt(Fields.FINAL_DIAGNOSIS);
-
-                if (diagnosisId != 0) {
-                    foundCase.setFinalDiagnosis(Diagnosis.values()[diagnosisId - 1]);
-                } else {
-                    foundCase.setFinalDiagnosis(null);
-                }
+                foundCase.setFinalDiagnosis(resultSet.getString(Fields.FINAL_DIAGNOSIS));
                 foundCase.setComplaints(resultSet.getString(Fields.COMPLAINTS));
                 foundCase.setMedicalCardId(resultSet.getInt(Fields.IDMEDICAL_CARD));
+
                 logger.debug("found case: " + foundCase);
                 caseList.add(foundCase);
             }
-            return caseList;
         }
         logger.debug("result set is null");
-        return null;
+        return caseList;
     }
 
     @Override
@@ -143,7 +125,7 @@ public class CaseDAO extends AbstractDAO implements ICaseDAO {
                 PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CASE);
                 preparedStatement.setString(1, updatedCase.getAdmissionDate());
                 preparedStatement.setString(2, updatedCase.getComplaints());
-                preparedStatement.setInt(3, updatedCase.getFinalDiagnosis().ordinal() + 1);
+                preparedStatement.setString(3, updatedCase.getFinalDiagnosis());
                 preparedStatement.setString(4, updatedCase.getDischargeDate());
                 preparedStatement.setInt(5, updatedCase.getId());
 
@@ -187,7 +169,7 @@ public class CaseDAO extends AbstractDAO implements ICaseDAO {
             Case updatedCase = (Case) entity;
             try {
                 PreparedStatement preparedStatement = connection.prepareStatement(CLOSE_CASE);
-                preparedStatement.setInt(1, updatedCase.getFinalDiagnosis().ordinal() + 1);
+                preparedStatement.setString(1, updatedCase.getFinalDiagnosis());
                 preparedStatement.setString(2, updatedCase.getDischargeDate());
                 preparedStatement.setInt(3, updatedCase.getId());
 
